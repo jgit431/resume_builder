@@ -1,0 +1,194 @@
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  background: #e8e4dc;
+  overflow: hidden;
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--cream-dark);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.btn-download {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-download:hover:not(:disabled) { background: var(--teal); transform: translateY(-1px); }
+.btn-download:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Scroll area ── */
+.preview-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Resume page (US Letter proportions) ── */
+.resume-page {
+  width: 100%;
+  max-width: 680px;
+  min-height: 880px;
+  background: var(--white);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg);
+  padding: 48px 52px;
+  color: #1a1a1a;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ── Empty state ── */
+.resume-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  color: #aaa;
+  text-align: center;
+}
+
+.resume-empty-icon { font-size: 48px; }
+.resume-empty p { font-size: 15px; max-width: 260px; }
+
+/* ── Resume: Header ── */
+.r-header {
+  border-bottom: 2.5px solid #1a1a1a;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.r-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  color: #1a1a1a;
+}
+
+.r-title {
+  font-size: 14px;
+  color: #555;
+  font-weight: 400;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.r-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #444;
+}
+
+/* ── Resume: Sections ── */
+.r-section {
+  margin-bottom: 20px;
+}
+
+.r-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #2a6b6b;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+
+.r-summary {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.65;
+}
+
+/* ── Resume: Entries ── */
+.r-entry {
+  margin-bottom: 14px;
+}
+
+.r-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.r-entry-role {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #1a1a1a;
+}
+
+.r-entry-company {
+  font-size: 13px;
+  color: #555;
+}
+
+.r-entry-date {
+  font-size: 11.5px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.r-bullets {
+  margin-top: 6px;
+  padding-left: 16px;
+  list-style: disc;
+  color: #333;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.r-bullets li { margin-bottom: 3px; }
+
+/* ── Resume: Skills ── */
+.r-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.r-skill {
+  background: #f0ece4;
+  color: #2a6b6b;
+  border: 1px solid #d5cfc4;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
