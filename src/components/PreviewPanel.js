@@ -123,11 +123,47 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
 export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
   const measureRef  = useRef();
   const [bodyHeight, setBodyHeight] = useState(PAGE_H_PX);
+  const [cutPoints, setCutPoints]   = useState([]); // safe Y positions for page breaks
 
   useEffect(() => {
-    if (measureRef.current) {
-      setBodyHeight(measureRef.current.scrollHeight);
+    const el = measureRef.current;
+    if (!el) return;
+
+    const totalH = el.scrollHeight;
+    setBodyHeight(totalH);
+
+    const mT    = Math.round(pageSettings.marginTop    * INCH_PX);
+    const mB    = Math.round(pageSettings.marginBottom * INCH_PX);
+    const areaH = PAGE_H_PX - mT - mB;
+    if (areaH <= 0) { setCutPoints([]); return; }
+
+    const rawPages = Math.ceil(totalH / areaH);
+    if (rawPages <= 1) { setCutPoints([]); return; }
+
+    // Measure where each line-level element ends so breaks snap between
+    // individual lines/bullets rather than entire sections or entries.
+    const elements = Array.from(el.querySelectorAll(
+      '.r-header, .r-section-title, .r-entry-header, .r-bullets li'
+    ));
+    const newCuts  = [];
+    let searchFrom = 0;
+
+    for (let page = 1; page < rawPages; page++) {
+      const idealCut = page * areaH;
+      let bestCut    = idealCut; // fallback: cut at ideal position
+
+      for (const elem of elements) {
+        const bottom = elem.offsetTop + elem.offsetHeight;
+        if (bottom > searchFrom && bottom <= idealCut) {
+          bestCut = bottom; // last element that fits completely on this page
+        }
+      }
+
+      newCuts.push(bestCut);
+      searchFrom = bestCut;
     }
+
+    setCutPoints(newCuts);
   }, [resume, sectionStyles, pageSettings]);
 
   const mTop    = Math.round(pageSettings.marginTop    * INCH_PX);
@@ -137,7 +173,13 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
 
   // How many px of content fit between top and bottom margins on one page
   const contentAreaH = PAGE_H_PX - mTop - mBottom;
-  const numPages     = Math.max(1, Math.ceil(bodyHeight / Math.max(contentAreaH, 1)));
+  const numPages     = cutPoints.length + 1;
+
+  // Start/end content-px for each page derived from safe cut points
+  const pageSlices = Array.from({ length: numPages }, (_, i) => ({
+    start: i === 0 ? 0 : cutPoints[i - 1],
+    end:   i < cutPoints.length ? cutPoints[i] : bodyHeight,
+  }));
 
   const bodyProps = { resume, sectionStyles, mLeft, mRight };
   const hasContent = resume.personal.name || resume.personal.email ||
@@ -160,20 +202,22 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
       el.style.left = '-9999px';
 
       // Canvas-pixel dimensions (scale=2)
-      const scale       = 2;
-      const pageW       = Math.round(PAGE_W_PX * scale);
-      const pageH       = Math.round(PAGE_H_PX * scale);
-      const mTopPx      = Math.round(mTop    * scale);
-      const mBottomPx   = Math.round(mBottom * scale);
-      const sliceH      = pageH - mTopPx - mBottomPx; // content rows per page
+      const scale     = 2;
+      const pageW     = Math.round(PAGE_W_PX * scale);
+      const pageH     = Math.round(PAGE_H_PX * scale);
+      const mTopPx    = Math.round(mTop    * scale);
 
-      const totalPages  = Math.max(1, Math.ceil(contentCanvas.height / sliceH));
-      const pdf         = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
 
-      for (let i = 0; i < totalPages; i++) {
+      // Use the same safe cut points computed for the live preview
+      const scaledCuts = cutPoints.map(c => Math.round(c * scale));
+
+      for (let i = 0; i < numPages; i++) {
         if (i > 0) pdf.addPage();
 
-        // Build a full-page canvas with white background
+        const srcY = i === 0 ? 0 : scaledCuts[i - 1];
+        const srcH = (i < scaledCuts.length ? scaledCuts[i] : contentCanvas.height) - srcY;
+
         const pageCanvas    = document.createElement('canvas');
         pageCanvas.width    = pageW;
         pageCanvas.height   = pageH;
@@ -181,14 +225,12 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
         ctx.fillStyle       = '#ffffff';
         ctx.fillRect(0, 0, pageW, pageH);
 
-        // Draw the correct content slice starting at mTop offset
-        const srcY  = i * sliceH;
-        const srcH  = Math.min(sliceH, contentCanvas.height - srcY);
         if (srcH > 0) {
           ctx.drawImage(contentCanvas, 0, srcY, pageW, srcH, 0, mTopPx, pageW, srcH);
         }
 
         pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, 8.5, 11);
+        pageCanvas.width = 0; // free canvas memory
       }
 
       pdf.save(`${resume.personal.name || 'resume'}.pdf`);
@@ -229,16 +271,10 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
             <React.Fragment key={i}>
               {/* White page sheet */}
               <div className="page-sheet" style={{ height: PAGE_H_PX }}>
-                {/*
-                  Clip the content to just the printable area (between margins).
-                  The inner content is shifted up by i * contentAreaH so each
-                  page shows its own slice, then pushed down by mTop so the
-                  top margin is consistent on every page.
-                */}
-                <div className="page-clip" style={{ top: mTop, height: contentAreaH }}>
+                <div className="page-clip" style={{ top: mTop, height: pageSlices[i].end - pageSlices[i].start }}>
                   <div
                     className="page-clip-inner"
-                    style={{ top: -(i * contentAreaH) }}
+                    style={{ top: -pageSlices[i].start }}
                   >
                     <ResumeBody {...bodyProps} />
                   </div>
