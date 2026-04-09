@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import './FormPanel.css';
 
 const SECTIONS = [
-  { id: 'personal', label: 'Personal Info', icon: '👤' },
+  { id: 'personal', label: 'Personal', icon: '👤' },
   { id: 'experience', label: 'Experience', icon: '💼' },
   { id: 'education', label: 'Education', icon: '🎓' },
   { id: 'skills', label: 'Skills', icon: '⚡' },
+  { id: 'page', label: 'Page Setup', icon: '📐' },
 ];
 
 export default function FormPanel({
@@ -15,6 +16,7 @@ export default function FormPanel({
   addEducation, updateEducation, removeEducation,
   addSkill, removeSkill,
   sectionStyles, updateSectionStyle,
+  pageSettings, updatePageSetting,
 }) {
   return (
     <div className="form-panel">
@@ -57,6 +59,9 @@ export default function FormPanel({
         )}
         {activeSection === 'skills' && (
           <SkillsForm skills={resume.skills} add={addSkill} remove={removeSkill} />
+        )}
+        {activeSection === 'page' && (
+          <PageSetupForm settings={pageSettings} update={updatePageSetting} />
         )}
       </div>
     </div>
@@ -331,6 +336,124 @@ function SkillsForm({ skills, add, remove }) {
         {SUGGESTIONS.filter(s => !skills.includes(s)).map(s => (
           <button key={s} className="suggestion-btn" onClick={() => add(s)}>{s}</button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Page Setup ────────────────────────────────────────────
+function PageSetupForm({ settings, update }) {
+  const MARGIN_MIN = 0.25;
+  const MARGIN_MAX = 2.0;
+  const MARGIN_STEP = 0.25;
+
+  const reset = () => {
+    update('marginTop', 1.0);
+    update('marginBottom', 1.0);
+    update('marginLeft', 1.0);
+    update('marginRight', 1.0);
+  };
+
+  return (
+    <div className="form-section">
+      <h2 className="section-heading">Page Setup</h2>
+      <p className="page-setup-desc">
+        Adjust margins for your printed resume. The live preview will update in real time.
+        All values are in inches.
+      </p>
+
+      {/* Visual margin diagram */}
+      <div className="margin-diagram">
+        <div className="margin-diagram-page">
+          <div
+            className="margin-diagram-top"
+            style={{ height: `${(settings.marginTop / MARGIN_MAX) * 40 + 8}px` }}
+          >
+            <span>{settings.marginTop}"</span>
+          </div>
+          <div className="margin-diagram-middle">
+            <div
+              className="margin-diagram-left"
+              style={{ width: `${(settings.marginLeft / MARGIN_MAX) * 40 + 8}px` }}
+            >
+              <span>{settings.marginLeft}"</span>
+            </div>
+            <div className="margin-diagram-content">
+              <div className="margin-diagram-lines">
+                {[80, 60, 70, 50, 65].map((w, i) => (
+                  <div key={i} className="margin-diagram-line" style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            </div>
+            <div
+              className="margin-diagram-right"
+              style={{ width: `${(settings.marginRight / MARGIN_MAX) * 40 + 8}px` }}
+            >
+              <span>{settings.marginRight}"</span>
+            </div>
+          </div>
+          <div
+            className="margin-diagram-bottom"
+            style={{ height: `${(settings.marginBottom / MARGIN_MAX) * 40 + 8}px` }}
+          >
+            <span>{settings.marginBottom}"</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Margin sliders */}
+      <div className="margin-sliders">
+        {[
+          { key: 'marginTop', label: 'Top Margin', icon: '↑' },
+          { key: 'marginBottom', label: 'Bottom Margin', icon: '↓' },
+          { key: 'marginLeft', label: 'Left Margin', icon: '←' },
+          { key: 'marginRight', label: 'Right Margin', icon: '→' },
+        ].map(({ key, label, icon }) => (
+          <div className="margin-slider-row" key={key}>
+            <div className="margin-slider-header">
+              <span className="margin-icon">{icon}</span>
+              <label className="style-label">{label}</label>
+              <span className="style-value">{settings[key].toFixed(2)}"</span>
+            </div>
+            <input
+              type="range"
+              min={MARGIN_MIN}
+              max={MARGIN_MAX}
+              step={MARGIN_STEP}
+              value={settings[key]}
+              onChange={e => update(key, parseFloat(e.target.value))}
+              className="style-slider"
+            />
+            <div className="margin-slider-ticks">
+              <span>0.25"</span>
+              <span>1.00"</span>
+              <span>2.00"</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button className="btn-reset-margins" onClick={reset}>
+        ↺ Reset to defaults (1" all sides)
+      </button>
+
+      <div className="page-info-box">
+        <div className="page-info-row">
+          <span>Paper Size</span>
+          <strong>US Letter — 8.5 × 11 in</strong>
+        </div>
+        <div className="page-info-row">
+          <span>Orientation</span>
+          <strong>Portrait</strong>
+        </div>
+        <div className="page-info-row">
+          <span>Content Width</span>
+          <strong>{(8.5 - settings.marginLeft - settings.marginRight).toFixed(2)}" available</strong>
+        </div>
+        <div className="page-info-row">
+          <span>Content Height</span>
+          <strong>{(11 - settings.marginTop - settings.marginBottom).toFixed(2)}" per page</strong>
+        </div>
       </div>
     </div>
   );

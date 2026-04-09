@@ -1,37 +1,212 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './PreviewPanel.css';
 
-export default function PreviewPanel({ resume, sectionStyles }) {
-  const previewRef = useRef();
+const PAGE_W_PX = 650;
+const INCH_PX   = PAGE_W_PX / 8.5;
+const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 
+// ─────────────────────────────────────────────────────────
+// Resume body — plain component, no forwardRef needed.
+// Left/right margins applied here; top/bottom handled per-page.
+// ─────────────────────────────────────────────────────────
+function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
+  const { personal, experience, education, skills } = resume;
+  const hasContent = personal.name || personal.email ||
+                     experience.length > 0 || education.length > 0;
+
+  return (
+    <div
+      className="resume-body"
+      style={{ paddingLeft: mLeft, paddingRight: mRight }}
+    >
+      {!hasContent ? (
+        <div className="resume-empty">
+          <div className="resume-empty-icon">📄</div>
+          <p>Start filling in the form to see your resume here.</p>
+        </div>
+      ) : (
+        <>
+          <div className="r-header">
+            {personal.name  && <h1 className="r-name">{personal.name}</h1>}
+            {personal.title && <p className="r-title">{personal.title}</p>}
+            <div className="r-contact">
+              {personal.email    && <span>✉ {personal.email}</span>}
+              {personal.phone    && <span>📞 {personal.phone}</span>}
+              {personal.location && <span>📍 {personal.location}</span>}
+              {personal.linkedin && <span>in {personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+              {personal.website  && <span>🌐 {personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+            </div>
+          </div>
+
+          {personal.summary && (
+            <div className="r-section">
+              <div className="r-section-title">Summary</div>
+              <p className="r-summary">{personal.summary}</p>
+            </div>
+          )}
+
+          {experience.length > 0 && (
+            <div className="r-section" style={{
+              fontFamily: sectionStyles.experience.fontFamily,
+              fontSize:   `${sectionStyles.experience.fontSize}px`,
+              lineHeight: sectionStyles.experience.lineHeight,
+            }}>
+              <div className="r-section-title">Experience</div>
+              {experience.map(exp => (
+                <div className="r-entry" key={exp.id}>
+                  <div className="r-entry-header">
+                    <div>
+                      <span className="r-entry-role">{exp.role}</span>
+                      {exp.company && <span className="r-entry-company"> · {exp.company}</span>}
+                    </div>
+                    <span className="r-entry-date">
+                      {exp.startDate}
+                      {exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}
+                      {exp.current ? 'Present' : exp.endDate}
+                    </span>
+                  </div>
+                  {exp.bullets.filter(b => b.trim()).length > 0 && (
+                    <ul className="r-bullets" style={{ lineHeight: sectionStyles.experience.lineHeight }}>
+                      {exp.bullets.filter(b => b.trim()).map((b, i) => (
+                        <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {education.length > 0 && (
+            <div className="r-section" style={{
+              fontFamily: sectionStyles.education.fontFamily,
+              fontSize:   `${sectionStyles.education.fontSize}px`,
+              lineHeight: sectionStyles.education.lineHeight,
+            }}>
+              <div className="r-section-title">Education</div>
+              {education.map(edu => (
+                <div className="r-entry" key={edu.id}>
+                  <div className="r-entry-header">
+                    <div>
+                      <span className="r-entry-role">{edu.school}</span>
+                      {(edu.degree || edu.field) && (
+                        <span className="r-entry-company"> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>
+                      )}
+                      {edu.gpa && <span className="r-entry-company"> — GPA {edu.gpa}</span>}
+                    </div>
+                    <span className="r-entry-date">
+                      {edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {skills.length > 0 && (
+            <div className="r-section">
+              <div className="r-section-title">Skills</div>
+              <div className="r-skills">
+                {skills.map(s => <span className="r-skill" key={s}>{s}</span>)}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Main panel
+// ─────────────────────────────────────────────────────────
+export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
+  const measureRef  = useRef();
+  const [bodyHeight, setBodyHeight] = useState(PAGE_H_PX);
+
+  useEffect(() => {
+    if (measureRef.current) {
+      setBodyHeight(measureRef.current.scrollHeight);
+    }
+  }, [resume, sectionStyles, pageSettings]);
+
+  const mTop    = Math.round(pageSettings.marginTop    * INCH_PX);
+  const mBottom = Math.round(pageSettings.marginBottom * INCH_PX);
+  const mLeft   = Math.round(pageSettings.marginLeft   * INCH_PX);
+  const mRight  = Math.round(pageSettings.marginRight  * INCH_PX);
+
+  // How many px of content fit between top and bottom margins on one page
+  const contentAreaH = PAGE_H_PX - mTop - mBottom;
+  const numPages     = Math.max(1, Math.ceil(bodyHeight / Math.max(contentAreaH, 1)));
+
+  const bodyProps = { resume, sectionStyles, mLeft, mRight };
+  const hasContent = resume.personal.name || resume.personal.email ||
+                     resume.experience.length > 0 || resume.education.length > 0;
+
+  // ── PDF export ───────────────────────────────────────────
   const handleDownload = async () => {
     try {
       const { default: html2canvas } = await import('html2canvas');
       const { jsPDF } = await import('jspdf');
 
-      const el = previewRef.current;
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      const imgData = canvas.toDataURL('image/png');
+      // Capture raw content (no top/bottom margins — added per-page below)
+      const el = measureRef.current;
+      el.style.left = '0';
+      const contentCanvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+      el.style.left = '-9999px';
 
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Canvas-pixel dimensions (scale=2)
+      const scale       = 2;
+      const pageW       = Math.round(PAGE_W_PX * scale);
+      const pageH       = Math.round(PAGE_H_PX * scale);
+      const mTopPx      = Math.round(mTop    * scale);
+      const mBottomPx   = Math.round(mBottom * scale);
+      const sliceH      = pageH - mTopPx - mBottomPx; // content rows per page
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const totalPages  = Math.max(1, Math.ceil(contentCanvas.height / sliceH));
+      const pdf         = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
+
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
+
+        // Build a full-page canvas with white background
+        const pageCanvas    = document.createElement('canvas');
+        pageCanvas.width    = pageW;
+        pageCanvas.height   = pageH;
+        const ctx           = pageCanvas.getContext('2d');
+        ctx.fillStyle       = '#ffffff';
+        ctx.fillRect(0, 0, pageW, pageH);
+
+        // Draw the correct content slice starting at mTop offset
+        const srcY  = i * sliceH;
+        const srcH  = Math.min(sliceH, contentCanvas.height - srcY);
+        if (srcH > 0) {
+          ctx.drawImage(contentCanvas, 0, srcY, pageW, srcH, 0, mTopPx, pageW, srcH);
+        }
+
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, 8.5, 11);
+      }
+
       pdf.save(`${resume.personal.name || 'resume'}.pdf`);
     } catch (err) {
+      if (measureRef.current) measureRef.current.style.left = '-9999px';
       console.error('PDF export failed', err);
-      alert('PDF export failed. Please try again.');
+      alert('PDF export failed: ' + err.message);
     }
   };
 
-  const { personal, experience, education, skills } = resume;
-  const hasContent = personal.name || personal.email || experience.length > 0 || education.length > 0;
-
   return (
     <div className="preview-panel">
+      {/* ── Toolbar ── */}
       <div className="preview-toolbar">
-        <span className="preview-label">Live Preview</span>
+        <span className="preview-label">
+          Live Preview
+          {numPages > 1 && <span className="preview-page-count"> · {numPages} pages</span>}
+        </span>
         <button className="btn-download" onClick={handleDownload} disabled={!hasContent}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -42,105 +217,44 @@ export default function PreviewPanel({ resume, sectionStyles }) {
         </button>
       </div>
 
+      {/* ── Hidden body for height measurement ── */}
+      <div className="measure-host" ref={measureRef}>
+        <ResumeBody {...bodyProps} />
+      </div>
+
+      {/* ── Visible paginated preview ── */}
       <div className="preview-scroll">
-        <div className="resume-page" ref={previewRef}>
-          {!hasContent ? (
-            <div className="resume-empty">
-              <div className="resume-empty-icon">📄</div>
-              <p>Start filling in the form to see your resume come to life here.</p>
-            </div>
-          ) : (
-            <>
-              {/* Header */}
-              <div className="r-header">
-                {personal.name && <h1 className="r-name">{personal.name}</h1>}
-                {personal.title && <p className="r-title">{personal.title}</p>}
-                <div className="r-contact">
-                  {personal.email && <span>✉ {personal.email}</span>}
-                  {personal.phone && <span>📞 {personal.phone}</span>}
-                  {personal.location && <span>📍 {personal.location}</span>}
-                  {personal.linkedin && <span>in {personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
-                  {personal.website && <span>🌐 {personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+        <div className="pages-stack" style={{ width: PAGE_W_PX }}>
+          {Array.from({ length: numPages }, (_, i) => (
+            <React.Fragment key={i}>
+              {/* White page sheet */}
+              <div className="page-sheet" style={{ height: PAGE_H_PX }}>
+                {/*
+                  Clip the content to just the printable area (between margins).
+                  The inner content is shifted up by i * contentAreaH so each
+                  page shows its own slice, then pushed down by mTop so the
+                  top margin is consistent on every page.
+                */}
+                <div className="page-clip" style={{ top: mTop, height: contentAreaH }}>
+                  <div
+                    className="page-clip-inner"
+                    style={{ top: -(i * contentAreaH) }}
+                  >
+                    <ResumeBody {...bodyProps} />
+                  </div>
                 </div>
               </div>
 
-              {/* Summary */}
-              {personal.summary && (
-                <div className="r-section">
-                  <div className="r-section-title">Summary</div>
-                  <p className="r-summary">{personal.summary}</p>
+              {/* Gap + dotted rule between pages */}
+              {i < numPages - 1 && (
+                <div className="page-gap">
+                  <div className="page-gap-rule" />
+                  <span className="page-gap-label">Page {i + 2}</span>
+                  <div className="page-gap-rule" />
                 </div>
               )}
-
-              {/* Experience */}
-              {experience.length > 0 && (
-                <div className="r-section" style={{
-                  fontFamily: sectionStyles.experience.fontFamily,
-                  fontSize: `${sectionStyles.experience.fontSize}px`,
-                  lineHeight: sectionStyles.experience.lineHeight,
-                }}>
-                  <div className="r-section-title">Experience</div>
-                  {experience.map(exp => (
-                    <div className="r-entry" key={exp.id}>
-                      <div className="r-entry-header">
-                        <div>
-                          <span className="r-entry-role">{exp.role}</span>
-                          {exp.company && <span className="r-entry-company"> · {exp.company}</span>}
-                        </div>
-                        <span className="r-entry-date">
-                          {exp.startDate}{exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}{exp.current ? 'Present' : exp.endDate}
-                        </span>
-                      </div>
-                      {exp.bullets.filter(b => b.trim()).length > 0 && (
-                        <ul className="r-bullets" style={{ lineHeight: sectionStyles.experience.lineHeight }}>
-                          {exp.bullets.filter(b => b.trim()).map((b, i) => (
-                            <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Education */}
-              {education.length > 0 && (
-                <div className="r-section" style={{
-                  fontFamily: sectionStyles.education.fontFamily,
-                  fontSize: `${sectionStyles.education.fontSize}px`,
-                  lineHeight: sectionStyles.education.lineHeight,
-                }}>
-                  <div className="r-section-title">Education</div>
-                  {education.map(edu => (
-                    <div className="r-entry" key={edu.id}>
-                      <div className="r-entry-header">
-                        <div>
-                          <span className="r-entry-role">{edu.school}</span>
-                          {(edu.degree || edu.field) && (
-                            <span className="r-entry-company"> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>
-                          )}
-                          {edu.gpa && <span className="r-entry-company"> — GPA {edu.gpa}</span>}
-                        </div>
-                        <span className="r-entry-date">
-                          {edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Skills */}
-              {skills.length > 0 && (
-                <div className="r-section">
-                  <div className="r-section-title">Skills</div>
-                  <div className="r-skills">
-                    {skills.map(s => <span className="r-skill" key={s}>{s}</span>)}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+            </React.Fragment>
+          ))}
         </div>
       </div>
     </div>

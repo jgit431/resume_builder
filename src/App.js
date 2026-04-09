@@ -6,18 +6,80 @@ import './App.css';
 
 const DEFAULT_RESUME = {
   personal: {
-    name: '',
-    title: '',
-    email: '',
-    phone: '',
-    location: '',
-    linkedin: '',
-    website: '',
-    summary: '',
+    name: 'John Smith',
+    title: 'Senior Software Engineer',
+    email: 'john.smith@email.com',
+    phone: '+1 (555) 867-5309',
+    location: 'Austin, TX',
+    linkedin: 'linkedin.com/in/johnsmith',
+    website: 'johnsmith.dev',
+    summary: 'Versatile Software Engineer with 8+ years of experience building scalable web applications and leading small engineering teams. Passionate about clean architecture, developer tooling, and shipping products that users love.',
   },
-  experience: [],
-  education: [],
-  skills: [],
+  experience: [
+    {
+      id: 1,
+      company: 'Orion Systems LLC',
+      role: 'Senior Software Engineer',
+      startDate: 'Jan 2022',
+      endDate: '',
+      current: true,
+      bullets: [
+        'Architected a distributed event-processing pipeline handling 12M+ daily transactions, reducing average latency by 41%.',
+        'Led a team of 5 engineers to migrate a monolithic Rails application to a microservices architecture, cutting deployment time from 45 minutes to under 4.',
+        'Introduced automated integration testing coverage from 23% to 91%, reducing production incidents by over half year-over-year.',
+      ],
+    },
+    {
+      id: 2,
+      company: 'Vantage Loop Co.',
+      role: 'Software Engineer',
+      startDate: 'May 2019',
+      endDate: 'Dec 2021',
+      current: false,
+      bullets: [
+        'Built and maintained a customer-facing dashboard used by 30,000+ monthly active users, improving page load speed by 60% via code-splitting and lazy loading.',
+        'Designed a RESTful API consumed by 3 internal teams and 2 third-party partners, with full OpenAPI documentation and versioning.',
+        'Mentored 2 junior engineers through weekly code reviews and pair programming sessions.',
+      ],
+    },
+    {
+      id: 3,
+      company: 'Trellford Group',
+      role: 'Junior Developer',
+      startDate: 'Jul 2017',
+      endDate: 'Apr 2019',
+      current: false,
+      bullets: [
+        'Developed reusable React component library adopted across 4 internal projects, reducing UI development time by an estimated 30%.',
+        'Resolved 120+ bug tickets over 18 months, consistently meeting SLA targets for critical issues.',
+      ],
+    },
+  ],
+  education: [
+    {
+      id: 1,
+      school: 'Westfield State University',
+      degree: 'M.S.',
+      field: 'Computer Science',
+      startDate: '2015',
+      endDate: '2017',
+      gpa: '3.8',
+    },
+    {
+      id: 2,
+      school: 'Crestview College',
+      degree: 'B.S.',
+      field: 'Software Engineering',
+      startDate: '2011',
+      endDate: '2015',
+      gpa: '3.6',
+    },
+  ],
+  skills: [
+    'JavaScript', 'TypeScript', 'React', 'Node.js', 'Python',
+    'PostgreSQL', 'Docker', 'AWS', 'GraphQL', 'REST APIs',
+    'CI/CD', 'System Design',
+  ],
 };
 
 const DEFAULT_STYLES = {
@@ -35,17 +97,29 @@ const DEFAULT_STYLES = {
   },
 };
 
+const DEFAULT_PAGE_SETTINGS = {
+  marginTop: 1.0,
+  marginBottom: 1.0,
+  marginLeft: 1.0,
+  marginRight: 1.0,
+};
+
 export default function App() {
   const [resume, setResume] = useState(DEFAULT_RESUME);
   const [sectionStyles, setSectionStyles] = useState(DEFAULT_STYLES);
+  const [pageSettings, setPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
   const [activeSection, setActiveSection] = useState('personal');
-  const [uploadStatus, setUploadStatus] = useState(null); // null | 'parsing' | 'done' | 'error'
+  const [uploadStatus, setUploadStatus] = useState(null);
 
   const updateSectionStyle = (section, field, value) => {
     setSectionStyles(s => ({
       ...s,
       [section]: { ...s[section], [field]: value },
     }));
+  };
+
+  const updatePageSetting = (field, value) => {
+    setPageSettings(s => ({ ...s, [field]: value }));
   };
 
   const updatePersonal = (field, value) => {
@@ -152,8 +226,10 @@ export default function App() {
           removeSkill={removeSkill}
           sectionStyles={sectionStyles}
           updateSectionStyle={updateSectionStyle}
+          pageSettings={pageSettings}
+          updatePageSetting={updatePageSetting}
         />
-        <PreviewPanel resume={resume} sectionStyles={sectionStyles} />
+        <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} />
       </div>
     </div>
   );

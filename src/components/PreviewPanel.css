@@ -1,10 +1,12 @@
+/* ── Panel shell ── */
 .preview-panel {
   display: flex;
   flex-direction: column;
-  background: #e8e4dc;
+  background: #ddd8cf;
   overflow: hidden;
 }
 
+/* ── Toolbar ── */
 .preview-toolbar {
   display: flex;
   align-items: center;
@@ -23,6 +25,11 @@
   color: var(--ink-faint);
 }
 
+.preview-page-count {
+  font-weight: 400;
+  color: var(--teal);
+}
+
 .btn-download {
   display: flex;
   align-items: center;
@@ -34,34 +41,88 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
+  cursor: pointer;
   transition: background 0.2s, transform 0.1s;
 }
-
 .btn-download:hover:not(:disabled) { background: var(--teal); transform: translateY(-1px); }
 .btn-download:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Hidden measurement host ── */
+/* position:fixed escapes the parent's overflow:hidden so html2canvas
+   can capture it. Parked at left:-9999px so it's never visible. */
+.measure-host {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 650px;
+  pointer-events: none;
+  background: white;
+}
 
 /* ── Scroll area ── */
 .preview-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 24px;
+  padding: 32px 24px 48px;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
-/* ── Resume page (US Letter proportions) ── */
-.resume-page {
-  width: 100%;
-  max-width: 680px;
-  min-height: 880px;
-  background: var(--white);
-  border-radius: 4px;
-  box-shadow: var(--shadow-lg);
-  padding: 48px 52px;
-  color: #1a1a1a;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  line-height: 1.55;
+/* ── Page stack ── */
+.pages-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── One white page sheet ── */
+.page-sheet {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  /* height set inline = PAGE_H_PX */
+}
+
+/* Clips the visible content area between top and bottom margins */
+.page-clip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  /* top and height set inline from JS margins */
+}
+
+/* Shifts content to show the correct page's slice */
+.page-clip-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* top set inline: -(pageIndex * contentAreaH) */
+}
+
+/* ── Gap between pages ── */
+.page-gap {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 2px;
+}
+
+.page-gap-rule {
+  flex: 1;
+  border-top: 2px dotted #b5aca0;
+}
+
+.page-gap-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b5aca0;
+  white-space: nowrap;
 }
 
 /* ── Empty state ── */
@@ -75,11 +136,21 @@
   color: #aaa;
   text-align: center;
 }
-
 .resume-empty-icon { font-size: 48px; }
-.resume-empty p { font-size: 15px; max-width: 260px; }
+.resume-empty p    { font-size: 15px; max-width: 260px; }
 
-/* ── Resume: Header ── */
+/* ── Resume body ── */
+.resume-body {
+  width: 650px;
+  box-sizing: border-box;
+  color: #1a1a1a;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  background: #fff;
+}
+
+/* ── Header ── */
 .r-header {
   border-bottom: 2.5px solid #1a1a1a;
   padding-bottom: 16px;
@@ -113,10 +184,8 @@
   color: #444;
 }
 
-/* ── Resume: Sections ── */
-.r-section {
-  margin-bottom: 20px;
-}
+/* ── Sections ── */
+.r-section { margin-bottom: 20px; }
 
 .r-section-title {
   font-size: 11px;
@@ -135,10 +204,8 @@
   line-height: 1.65;
 }
 
-/* ── Resume: Entries ── */
-.r-entry {
-  margin-bottom: 14px;
-}
+/* ── Entries ── */
+.r-entry { margin-bottom: 14px; }
 
 .r-entry-header {
   display: flex;
@@ -148,22 +215,9 @@
   gap: 4px;
 }
 
-.r-entry-role {
-  font-weight: 700;
-  font-size: 1em;
-  color: #1a1a1a;
-}
-
-.r-entry-company {
-  font-size: 1em;
-  color: #555;
-}
-
-.r-entry-date {
-  font-size: 1em;
-  color: #888;
-  white-space: nowrap;
-}
+.r-entry-role    { font-weight: 700; font-size: 1em;    color: #1a1a1a; }
+.r-entry-company { font-size: 1em;                      color: #555; }
+.r-entry-date    { font-size: 0.88em; white-space: nowrap; color: #888; }
 
 .r-bullets {
   margin-top: 6px;
@@ -173,15 +227,10 @@
   font-size: 0.85em;
   line-height: inherit;
 }
-
 .r-bullets li { margin-bottom: 3px; }
 
-/* ── Resume: Skills ── */
-.r-skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
+/* ── Skills ── */
+.r-skills { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .r-skill {
   background: #f0ece4;

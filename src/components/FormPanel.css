@@ -416,3 +416,175 @@
 }
 
 .checkbox-label input { accent-color: var(--teal); }
+
+/* ── Page Setup ── */
+.page-setup-desc {
+  font-size: 13px;
+  color: var(--ink-light);
+  line-height: 1.6;
+}
+
+/* Margin diagram */
+.margin-diagram {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.margin-diagram-page {
+  width: 160px;
+  height: 207px; /* 8.5x11 ratio */
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.margin-diagram-top,
+.margin-diagram-bottom {
+  background: rgba(42, 107, 107, 0.1);
+  border-color: var(--teal-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: height 0.2s;
+}
+
+.margin-diagram-top { border-bottom: 1px dashed var(--teal); }
+.margin-diagram-bottom { border-top: 1px dashed var(--teal); }
+
+.margin-diagram-top span,
+.margin-diagram-bottom span,
+.margin-diagram-left span,
+.margin-diagram-right span {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--teal);
+  white-space: nowrap;
+}
+
+.margin-diagram-middle {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.margin-diagram-left,
+.margin-diagram-right {
+  background: rgba(42, 107, 107, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: width 0.2s;
+}
+
+.margin-diagram-left { border-right: 1px dashed var(--teal); }
+.margin-diagram-right { border-left: 1px dashed var(--teal); }
+
+.margin-diagram-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+}
+
+.margin-diagram-lines {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.margin-diagram-line {
+  height: 5px;
+  background: var(--cream-dark);
+  border-radius: 2px;
+}
+
+/* Margin sliders */
+.margin-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.margin-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.margin-slider-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.margin-slider-header .style-label {
+  flex: 1;
+}
+
+.margin-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+  color: var(--teal);
+}
+
+.margin-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--ink-faint);
+  padding: 0 2px;
+}
+
+/* Reset button */
+.btn-reset-margins {
+  background: none;
+  border: 1.5px solid var(--border);
+  color: var(--ink-light);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.btn-reset-margins:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: var(--teal-light);
+}
+
+/* Page info box */
+.page-info-box {
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.page-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-light);
+}
+
+.page-info-row strong {
+  color: var(--ink);
+  font-weight: 600;
+}
