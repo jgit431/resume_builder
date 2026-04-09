@@ -108,6 +108,13 @@ const FONT_OPTIONS = [
 function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
   const [open, setOpen] = useState(false);
 
+  const reset = () => {
+    updateStyle('fontFamily', 'DM Sans');
+    updateStyle('fontSize', 13);
+    updateStyle('lineHeight', 1.6);
+    if (showBulletSpacing) updateStyle('bulletSpacing', 3);
+  };
+
   return (
     <div className="style-toolbar">
       <button className="style-toolbar-toggle" onClick={() => setOpen(o => !o)}>
@@ -168,6 +175,10 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
               />
             </div>
           )}
+
+          <button className="btn-reset-margins" onClick={reset}>
+            ↺ Reset to defaults
+          </button>
         </div>
       )}
     </div>
