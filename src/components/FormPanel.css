@@ -628,3 +628,38 @@
   color: var(--teal);
   font-size: 9px;
 }
+
+/* ── Alignment toggle ── */
+.align-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.align-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--cream);
+  color: var(--ink-light);
+  font-size: 12px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.align-btn:hover {
+  border-color: var(--teal);
+  color: var(--ink);
+}
+
+.align-btn.active {
+  border-color: var(--teal);
+  background: var(--teal-light);
+  color: var(--teal);
+  font-weight: 600;
+}

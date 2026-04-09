@@ -9,10 +9,15 @@ const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 // Resume body — plain component, no forwardRef needed.
 // Left/right margins applied here; top/bottom handled per-page.
 // ─────────────────────────────────────────────────────────
-function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight }) {
+function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
+
+  const align    = personalStyles.headerAlign ?? 'left';
+  const showIcons = personalStyles.showIcons ?? true;
+
+  const ICONS = { email: '✉', phone: '📞', location: '📍', linkedin: 'in', website: '🌐' };
 
   return (
     <div
@@ -26,15 +31,15 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight }) {
         </div>
       ) : (
         <>
-          <div className="r-header">
+          <div className="r-header" style={{ textAlign: align }}>
             {personal.name  && <h1 className="r-name">{personal.name}</h1>}
             {personal.title && <p className="r-title">{personal.title}</p>}
-            <div className="r-contact">
-              {personal.email    && <span>✉ {personal.email}</span>}
-              {personal.phone    && <span>📞 {personal.phone}</span>}
-              {personal.location && <span>📍 {personal.location}</span>}
-              {personal.linkedin && <span>in {personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
-              {personal.website  && <span>🌐 {personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+            <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
+              {personal.email    && <span>{showIcons ? `${ICONS.email} ` : ''}{personal.email}</span>}
+              {personal.phone    && <span>{showIcons ? `${ICONS.phone} ` : ''}{personal.phone}</span>}
+              {personal.location && <span>{showIcons ? `${ICONS.location} ` : ''}{personal.location}</span>}
+              {personal.linkedin && <span>{showIcons ? `${ICONS.linkedin} ` : ''}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+              {personal.website  && <span>{showIcons ? `${ICONS.website} ` : ''}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
             </div>
           </div>
 
@@ -184,8 +189,9 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
     end:   i < cutPoints.length ? cutPoints[i] : bodyHeight,
   }));
 
-  const lineHeight = pageSettings.lineHeight ?? 1.6;
-  const bodyProps  = { resume, sectionStyles, mLeft, mRight, lineHeight };
+  const lineHeight     = pageSettings.lineHeight ?? 1.6;
+  const personalStyles = sectionStyles.personal ?? { headerAlign: 'left', showIcons: true };
+  const bodyProps      = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles };
   const hasContent = resume.personal.name || resume.personal.email ||
                      resume.experience.length > 0 || resume.education.length > 0;
 

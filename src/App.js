@@ -83,20 +83,21 @@ const DEFAULT_RESUME = {
 };
 
 const DEFAULT_STYLES = {
+  personal: {
+    headerAlign: 'left',  // 'left' | 'center' | 'right'
+    showIcons: true,
+  },
   experience: {
     fontFamily: 'DM Sans',
     fontSize: 13,
-    lineHeight: 1.6,
     bulletSpacing: 3,
   },
   education: {
     fontFamily: 'DM Sans',
     fontSize: 13,
-    lineHeight: 1.6,
-    bulletSpacing: 3,
   },
   skills: {
-    separator: 'comma', // 'comma' | 'marker'
+    separator: 'comma',
   },
 };
 
@@ -105,6 +106,7 @@ const DEFAULT_PAGE_SETTINGS = {
   marginBottom: 1.0,
   marginLeft: 1.0,
   marginRight: 1.0,
+  lineHeight: 1.6,
 };
 
 export default function App() {

@@ -35,7 +35,12 @@ export default function FormPanel({
 
       <div className="form-content animate-in" key={activeSection}>
         {activeSection === 'personal' && (
-          <PersonalForm data={resume.personal} update={updatePersonal} />
+          <PersonalForm
+            data={resume.personal}
+            update={updatePersonal}
+            styles={sectionStyles.personal}
+            updateStyle={(field, value) => updateSectionStyle('personal', field, value)}
+          />
         )}
         {activeSection === 'experience' && (
           <ExperienceForm
@@ -75,10 +80,67 @@ export default function FormPanel({
 }
 
 // ── Personal ──────────────────────────────────────────────
-function PersonalForm({ data, update }) {
+function PersonalForm({ data, update, styles, updateStyle }) {
+  const [styleOpen, setStyleOpen] = useState(false);
+
+  const reset = () => {
+    updateStyle('headerAlign', 'left');
+    updateStyle('showIcons', true);
+  };
+
   return (
     <div className="form-section">
       <h2 className="section-heading">Personal Information</h2>
+
+      {/* Style Options collapsible */}
+      <div className="style-toolbar">
+        <button className="style-toolbar-toggle" onClick={() => setStyleOpen(o => !o)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+          </svg>
+          Style Options
+          <span className="style-toolbar-chevron">{styleOpen ? '▲' : '▼'}</span>
+        </button>
+        {styleOpen && (
+          <div className="style-toolbar-body">
+
+            {/* Header alignment */}
+            <div className="style-row">
+              <label className="style-label">Header Alignment</label>
+              <div className="align-toggle">
+                {['left', 'center', 'right'].map(align => (
+                  <button
+                    key={align}
+                    className={`align-btn ${styles.headerAlign === align ? 'active' : ''}`}
+                    onClick={() => updateStyle('headerAlign', align)}
+                    title={align.charAt(0).toUpperCase() + align.slice(1)}
+                  >
+                    {align === 'left'   && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>}
+                    {align === 'center' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>}
+                    {align === 'right'  && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>}
+                    <span>{align.charAt(0).toUpperCase() + align.slice(1)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Icons toggle */}
+            <div className="style-row">
+              <label className="style-label">Contact Icons</label>
+              <button
+                className={`sep-btn ${styles.showIcons ? 'active' : ''}`}
+                onClick={() => updateStyle('showIcons', !styles.showIcons)}
+              >
+                Show Icons
+              </button>
+            </div>
+
+            <button className="btn-reset-margins" onClick={reset}>
+              ↺ Reset to defaults
+            </button>
+          </div>
+        )}
+      </div>
       <Field label="Full Name" value={data.name} onChange={v => update('name', v)} placeholder="Jane Smith" />
       <Field label="Professional Title" value={data.title} onChange={v => update('title', v)} placeholder="Senior Product Designer" />
       <div className="field-row">
