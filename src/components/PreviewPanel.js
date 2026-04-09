@@ -9,7 +9,44 @@ const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 // Resume body — plain component, no forwardRef needed.
 // Left/right margins applied here; top/bottom handled per-page.
 // ─────────────────────────────────────────────────────────
-const ICONS = { email: '✉', phone: '📞', location: '📍', linkedin: 'in', website: '🌐' };
+const SVG_ICONS = {
+  email: (color) => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  ),
+  phone: (color) => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.09 4.93 2 2 0 0 1 3 2.84h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 10a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.16 17z"/>
+    </svg>
+  ),
+  location: (color) => color === '#1a1a1a' ? (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  ) : (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="#e84040" stroke="#e84040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="white" stroke="white"/>
+    </svg>
+  ),
+  linkedin: (color) => color === '#1a1a1a' ? (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+    </svg>
+  ) : (
+    <svg width="12" height="12" viewBox="0 0 24 24">
+      <rect x="0" y="0" width="24" height="24" rx="4" fill="#0077b5"/>
+      <path d="M7 10v7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="7" cy="7" r="1.2" fill="white"/>
+      <path d="M11 10v7M11 13c0-1.66 1.34-3 3-3s3 1.34 3 3v4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ),
+  website: (color) => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  ),
+};
 
 function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents }) {
   const { personal, experience, education, skills } = resume;
@@ -35,11 +72,11 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personal
             {personal.name  && <h1 className="r-name">{personal.name}</h1>}
             {personal.title && <p className="r-title">{personal.title}</p>}
             <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
-              {personal.email    && <span>{showIcons ? `${ICONS.email} ` : ''}{personal.email}</span>}
-              {personal.phone    && <span>{showIcons ? `${ICONS.phone} ` : ''}{personal.phone}</span>}
-              {personal.location && <span>{showIcons ? `${ICONS.location} ` : ''}{personal.location}</span>}
-              {personal.linkedin && <span>{showIcons ? `${ICONS.linkedin} ` : ''}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
-              {personal.website  && <span>{showIcons ? `${ICONS.website} ` : ''}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+              {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(accent)}{personal.email}</span>}
+              {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(accent)}{personal.phone}</span>}
+              {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(accent)}{personal.location}</span>}
+              {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.linkedin(accent)}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+              {personal.website  && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.website(accent)}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
             </div>
           </div>
 
@@ -205,13 +242,15 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
 
       // Capture raw content (no top/bottom margins — added per-page below)
       const el = measureRef.current;
-      el.style.left = '0';
+      const rect = el.getBoundingClientRect();
       const contentCanvas = await html2canvas(el, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
+        scrollX: -rect.left,
+        scrollY: -rect.top,
+        windowWidth: PAGE_W_PX,
       });
-      el.style.left = '-9999px';
 
       // Canvas-pixel dimensions (scale=2)
       const scale     = 2;
@@ -247,7 +286,6 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
 
       pdf.save(`${resume.personal.name || 'resume'}.pdf`);
     } catch (err) {
-      if (measureRef.current) measureRef.current.style.left = '-9999px';
       console.error('PDF export failed', err);
       alert('PDF export failed: ' + err.message);
     }
