@@ -20,10 +20,33 @@ const DEFAULT_RESUME = {
   skills: [],
 };
 
+const DEFAULT_STYLES = {
+  experience: {
+    fontFamily: 'DM Sans',
+    fontSize: 13,
+    lineHeight: 1.6,
+    bulletSpacing: 3,
+  },
+  education: {
+    fontFamily: 'DM Sans',
+    fontSize: 13,
+    lineHeight: 1.6,
+    bulletSpacing: 3,
+  },
+};
+
 export default function App() {
   const [resume, setResume] = useState(DEFAULT_RESUME);
+  const [sectionStyles, setSectionStyles] = useState(DEFAULT_STYLES);
   const [activeSection, setActiveSection] = useState('personal');
   const [uploadStatus, setUploadStatus] = useState(null); // null | 'parsing' | 'done' | 'error'
+
+  const updateSectionStyle = (section, field, value) => {
+    setSectionStyles(s => ({
+      ...s,
+      [section]: { ...s[section], [field]: value },
+    }));
+  };
 
   const updatePersonal = (field, value) => {
     setResume(r => ({ ...r, personal: { ...r.personal, [field]: value } }));
@@ -127,8 +150,10 @@ export default function App() {
           removeEducation={removeEducation}
           addSkill={addSkill}
           removeSkill={removeSkill}
+          sectionStyles={sectionStyles}
+          updateSectionStyle={updateSectionStyle}
         />
-        <PreviewPanel resume={resume} />
+        <PreviewPanel resume={resume} sectionStyles={sectionStyles} />
       </div>
     </div>
   );

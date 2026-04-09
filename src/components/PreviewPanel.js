@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import './PreviewPanel.css';
 
-export default function PreviewPanel({ resume }) {
+export default function PreviewPanel({ resume, sectionStyles }) {
   const previewRef = useRef();
 
   const handleDownload = async () => {
@@ -74,7 +74,11 @@ export default function PreviewPanel({ resume }) {
 
               {/* Experience */}
               {experience.length > 0 && (
-                <div className="r-section">
+                <div className="r-section" style={{
+                  fontFamily: sectionStyles.experience.fontFamily,
+                  fontSize: `${sectionStyles.experience.fontSize}px`,
+                  lineHeight: sectionStyles.experience.lineHeight,
+                }}>
                   <div className="r-section-title">Experience</div>
                   {experience.map(exp => (
                     <div className="r-entry" key={exp.id}>
@@ -88,9 +92,9 @@ export default function PreviewPanel({ resume }) {
                         </span>
                       </div>
                       {exp.bullets.filter(b => b.trim()).length > 0 && (
-                        <ul className="r-bullets">
+                        <ul className="r-bullets" style={{ lineHeight: sectionStyles.experience.lineHeight }}>
                           {exp.bullets.filter(b => b.trim()).map((b, i) => (
-                            <li key={i}>{b}</li>
+                            <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>
                           ))}
                         </ul>
                       )}
@@ -101,7 +105,11 @@ export default function PreviewPanel({ resume }) {
 
               {/* Education */}
               {education.length > 0 && (
-                <div className="r-section">
+                <div className="r-section" style={{
+                  fontFamily: sectionStyles.education.fontFamily,
+                  fontSize: `${sectionStyles.education.fontSize}px`,
+                  lineHeight: sectionStyles.education.lineHeight,
+                }}>
                   <div className="r-section-title">Education</div>
                   {education.map(edu => (
                     <div className="r-entry" key={edu.id}>

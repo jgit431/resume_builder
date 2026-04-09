@@ -14,6 +14,7 @@ export default function FormPanel({
   addExperience, updateExperience, removeExperience,
   addEducation, updateEducation, removeEducation,
   addSkill, removeSkill,
+  sectionStyles, updateSectionStyle,
 }) {
   return (
     <div className="form-panel">
@@ -40,6 +41,8 @@ export default function FormPanel({
             add={addExperience}
             update={updateExperience}
             remove={removeExperience}
+            styles={sectionStyles.experience}
+            updateStyle={(field, value) => updateSectionStyle('experience', field, value)}
           />
         )}
         {activeSection === 'education' && (
@@ -48,6 +51,8 @@ export default function FormPanel({
             add={addEducation}
             update={updateEducation}
             remove={removeEducation}
+            styles={sectionStyles.education}
+            updateStyle={(field, value) => updateSectionStyle('education', field, value)}
           />
         )}
         {activeSection === 'skills' && (
@@ -85,11 +90,91 @@ function PersonalForm({ data, update }) {
   );
 }
 
+// ── Style Toolbar ─────────────────────────────────────────
+const FONT_OPTIONS = [
+  { label: 'DM Sans', value: 'DM Sans' },
+  { label: 'Georgia', value: 'Georgia' },
+  { label: 'Times New Roman', value: 'Times New Roman' },
+  { label: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
+  { label: 'Garamond', value: 'Garamond, serif' },
+  { label: 'Courier New', value: 'Courier New, monospace' },
+];
+
+function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="style-toolbar">
+      <button className="style-toolbar-toggle" onClick={() => setOpen(o => !o)}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+        </svg>
+        Style Options
+        <span className="style-toolbar-chevron">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="style-toolbar-body">
+          {/* Font Family */}
+          <div className="style-row">
+            <label className="style-label">Font</label>
+            <select
+              className="style-select"
+              value={styles.fontFamily}
+              onChange={e => updateStyle('fontFamily', e.target.value)}
+            >
+              {FONT_OPTIONS.map(f => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Font Size */}
+          <div className="style-row">
+            <label className="style-label">Size <span className="style-value">{styles.fontSize}px</span></label>
+            <input
+              type="range" min={10} max={16} step={0.5}
+              value={styles.fontSize}
+              onChange={e => updateStyle('fontSize', parseFloat(e.target.value))}
+              className="style-slider"
+            />
+          </div>
+
+          {/* Line Height */}
+          <div className="style-row">
+            <label className="style-label">Line Height <span className="style-value">{styles.lineHeight}×</span></label>
+            <input
+              type="range" min={1.2} max={2.2} step={0.1}
+              value={styles.lineHeight}
+              onChange={e => updateStyle('lineHeight', parseFloat(e.target.value))}
+              className="style-slider"
+            />
+          </div>
+
+          {/* Bullet Spacing (only for experience) */}
+          {showBulletSpacing && (
+            <div className="style-row">
+              <label className="style-label">Bullet Spacing <span className="style-value">{styles.bulletSpacing}px</span></label>
+              <input
+                type="range" min={0} max={12} step={1}
+                value={styles.bulletSpacing}
+                onChange={e => updateStyle('bulletSpacing', parseInt(e.target.value))}
+                className="style-slider"
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Experience ────────────────────────────────────────────
-function ExperienceForm({ items, add, update, remove }) {
+function ExperienceForm({ items, add, update, remove, styles, updateStyle }) {
   return (
     <div className="form-section">
       <h2 className="section-heading">Work Experience</h2>
+      <StyleToolbar styles={styles} updateStyle={updateStyle} showBulletSpacing={true} />
       {items.length === 0 && (
         <p className="empty-hint">No experience added yet. Click the button below to add your first role.</p>
       )}
@@ -164,10 +249,11 @@ function ExperienceCard({ exp, idx, update, remove }) {
 }
 
 // ── Education ─────────────────────────────────────────────
-function EducationForm({ items, add, update, remove }) {
+function EducationForm({ items, add, update, remove, styles, updateStyle }) {
   return (
     <div className="form-section">
       <h2 className="section-heading">Education</h2>
+      <StyleToolbar styles={styles} updateStyle={updateStyle} showBulletSpacing={false} />
       {items.length === 0 && (
         <p className="empty-hint">No education added yet.</p>
       )}

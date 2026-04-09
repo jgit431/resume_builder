@@ -150,17 +150,17 @@
 
 .r-entry-role {
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 1em;
   color: #1a1a1a;
 }
 
 .r-entry-company {
-  font-size: 13px;
+  font-size: 1em;
   color: #555;
 }
 
 .r-entry-date {
-  font-size: 11.5px;
+  font-size: 1em;
   color: #888;
   white-space: nowrap;
 }
@@ -170,8 +170,8 @@
   padding-left: 16px;
   list-style: disc;
   color: #333;
-  font-size: 12.5px;
-  line-height: 1.6;
+  font-size: 0.85em;
+  line-height: inherit;
 }
 
 .r-bullets li { margin-bottom: 3px; }
