@@ -230,14 +230,24 @@
 .r-bullets li { margin-bottom: 3px; }
 
 /* ── Skills ── */
-.r-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.r-skills-comma {
+  font-size: 12.5px;
+  color: #222;
+  line-height: 1.7;
+}
 
-.r-skill {
-  background: #f0ece4;
+.r-skills-marker {
+  font-size: 12.5px;
+  color: #222;
+  line-height: 1.7;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.r-skill-dot {
   color: #2a6b6b;
-  border: 1px solid #d5cfc4;
-  padding: 3px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 9px;
+  margin: 0 4px;
 }

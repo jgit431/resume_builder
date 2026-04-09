@@ -58,7 +58,13 @@ export default function FormPanel({
           />
         )}
         {activeSection === 'skills' && (
-          <SkillsForm skills={resume.skills} add={addSkill} remove={removeSkill} />
+          <SkillsForm
+            skills={resume.skills}
+            add={addSkill}
+            remove={removeSkill}
+            styles={sectionStyles.skills}
+            updateStyle={(field, value) => updateSectionStyle('skills', field, value)}
+          />
         )}
         {activeSection === 'page' && (
           <PageSetupForm settings={pageSettings} update={updatePageSetting} />
@@ -304,8 +310,9 @@ function EducationForm({ items, add, update, remove, styles, updateStyle }) {
 }
 
 // ── Skills ────────────────────────────────────────────────
-function SkillsForm({ skills, add, remove }) {
+function SkillsForm({ skills, add, remove, styles, updateStyle }) {
   const [input, setInput] = useState('');
+  const [styleOpen, setStyleOpen] = useState(false);
 
   const handleAdd = () => {
     const trimmed = input.trim();
@@ -324,6 +331,41 @@ function SkillsForm({ skills, add, remove }) {
   return (
     <div className="form-section">
       <h2 className="section-heading">Skills</h2>
+
+      {/* Style Options collapsible */}
+      <div className="style-toolbar">
+        <button className="style-toolbar-toggle" onClick={() => setStyleOpen(o => !o)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+          </svg>
+          Style Options
+          <span className="style-toolbar-chevron">{styleOpen ? '▲' : '▼'}</span>
+        </button>
+        {styleOpen && (
+          <div className="style-toolbar-body">
+            <div className="style-row">
+              <label className="style-label">Separator Style</label>
+              <div className="separator-toggle">
+                <button
+                  className={`sep-btn ${styles.separator === 'comma' ? 'active' : ''}`}
+                  onClick={() => updateStyle('separator', 'comma')}
+                >
+                  Comma Separated
+                </button>
+                <button
+                  className={`sep-btn ${styles.separator === 'marker' ? 'active' : ''}`}
+                  onClick={() => updateStyle('separator', 'marker')}
+                >
+                  Marker Separated
+                </button>
+              </div>
+            </div>
+            <button className="btn-reset-margins" onClick={() => updateStyle('separator', 'comma')}>
+              ↺ Reset to defaults
+            </button>
+          </div>
+        )}
+      </div>
       <div className="skills-input-row">
         <input
           className="field-input"

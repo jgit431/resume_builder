@@ -106,9 +106,20 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
           {skills.length > 0 && (
             <div className="r-section">
               <div className="r-section-title">Skills</div>
-              <div className="r-skills">
-                {skills.map(s => <span className="r-skill" key={s}>{s}</span>)}
-              </div>
+              {sectionStyles.skills.separator === 'comma' ? (
+                <p className="r-skills-comma">
+                  {skills.join(', ')}
+                </p>
+              ) : (
+                <p className="r-skills-marker">
+                  {skills.map((s, i) => (
+                    <span key={s}>
+                      {i > 0 && <span className="r-skill-dot">▪</span>}
+                      {s}
+                    </span>
+                  ))}
+                </p>
+              )}
             </div>
           )}
         </>

@@ -95,6 +95,9 @@ const DEFAULT_STYLES = {
     lineHeight: 1.6,
     bulletSpacing: 3,
   },
+  skills: {
+    separator: 'comma', // 'comma' | 'marker'
+  },
 };
 
 const DEFAULT_PAGE_SETTINGS = {

@@ -588,3 +588,43 @@
   color: var(--ink);
   font-weight: 600;
 }
+
+/* ── Skills separator toggle ── */
+.separator-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sep-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--cream);
+  color: var(--ink-light);
+  font-size: 13px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.sep-btn:hover {
+  border-color: var(--teal);
+  color: var(--ink);
+}
+
+.sep-btn.active {
+  border-color: var(--teal);
+  background: var(--teal-light);
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.sep-btn-dot {
+  color: var(--teal);
+  font-size: 9px;
+}
