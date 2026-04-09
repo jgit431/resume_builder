@@ -9,15 +9,14 @@ const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 // Resume body — plain component, no forwardRef needed.
 // Left/right margins applied here; top/bottom handled per-page.
 // ─────────────────────────────────────────────────────────
+const ICONS = { email: '✉', phone: '📞', location: '📍', linkedin: 'in', website: '🌐' };
+
 function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
-
-  const align    = personalStyles.headerAlign ?? 'left';
+  const align     = personalStyles.headerAlign ?? 'left';
   const showIcons = personalStyles.showIcons ?? true;
-
-  const ICONS = { email: '✉', phone: '📞', location: '📍', linkedin: 'in', website: '🌐' };
 
   return (
     <div
@@ -56,28 +55,31 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personal
               fontSize:   `${sectionStyles.experience.fontSize}px`,
             }}>
               <div className="r-section-title">Experience</div>
-              {experience.map(exp => (
-                <div className="r-entry" key={exp.id}>
-                  <div className="r-entry-header">
-                    <div>
-                      <span className="r-entry-role">{exp.role}</span>
-                      {exp.company && <span className="r-entry-company"> · {exp.company}</span>}
+              {experience.map(exp => {
+                const bullets = exp.bullets.filter(b => b.trim());
+                return (
+                  <div className="r-entry" key={exp.id}>
+                    <div className="r-entry-header">
+                      <div>
+                        <span className="r-entry-role">{exp.role}</span>
+                        {exp.company && <span className="r-entry-company"> · {exp.company}</span>}
+                      </div>
+                      <span className="r-entry-date">
+                        {exp.startDate}
+                        {exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}
+                        {exp.current ? 'Present' : exp.endDate}
+                      </span>
                     </div>
-                    <span className="r-entry-date">
-                      {exp.startDate}
-                      {exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}
-                      {exp.current ? 'Present' : exp.endDate}
-                    </span>
+                    {bullets.length > 0 && (
+                      <ul className="r-bullets">
+                        {bullets.map((b, i) => (
+                          <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  {exp.bullets.filter(b => b.trim()).length > 0 && (
-                    <ul className="r-bullets">
-                      {exp.bullets.filter(b => b.trim()).map((b, i) => (
-                        <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
