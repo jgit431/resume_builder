@@ -117,7 +117,6 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
   const reset = () => {
     updateStyle('fontFamily', 'DM Sans');
     updateStyle('fontSize', 13);
-    updateStyle('lineHeight', 1.6);
     if (showBulletSpacing) updateStyle('bulletSpacing', 3);
   };
 
@@ -154,17 +153,6 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
               type="range" min={10} max={16} step={0.5}
               value={styles.fontSize}
               onChange={e => updateStyle('fontSize', parseFloat(e.target.value))}
-              className="style-slider"
-            />
-          </div>
-
-          {/* Line Height */}
-          <div className="style-row">
-            <label className="style-label">Line Height <span className="style-value">{styles.lineHeight}×</span></label>
-            <input
-              type="range" min={1.2} max={2.2} step={0.1}
-              value={styles.lineHeight}
-              onChange={e => updateStyle('lineHeight', parseFloat(e.target.value))}
               className="style-slider"
             />
           </div>
@@ -405,6 +393,7 @@ function PageSetupForm({ settings, update }) {
     update('marginBottom', 1.0);
     update('marginLeft', 1.0);
     update('marginRight', 1.0);
+    update('lineHeight', 1.6);
   };
 
   return (
@@ -450,6 +439,28 @@ function PageSetupForm({ settings, update }) {
             style={{ height: `${(settings.marginBottom / MARGIN_MAX) * 40 + 8}px` }}
           >
             <span>{settings.marginBottom}"</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Line Height */}
+      <div className="margin-sliders">
+        <div className="margin-slider-row">
+          <div className="margin-slider-header">
+            <span className="margin-icon">↕</span>
+            <label className="style-label">Line Height</label>
+            <span className="style-value">{(settings.lineHeight ?? 1.6).toFixed(1)}×</span>
+          </div>
+          <input
+            type="range" min={1.0} max={2.2} step={0.1}
+            value={settings.lineHeight ?? 1.6}
+            onChange={e => update('lineHeight', parseFloat(e.target.value))}
+            className="style-slider"
+          />
+          <div className="margin-slider-ticks">
+            <span>1.0×</span>
+            <span>1.6×</span>
+            <span>2.2×</span>
           </div>
         </div>
       </div>

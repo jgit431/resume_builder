@@ -9,7 +9,7 @@ const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 // Resume body — plain component, no forwardRef needed.
 // Left/right margins applied here; top/bottom handled per-page.
 // ─────────────────────────────────────────────────────────
-function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
+function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
@@ -17,7 +17,7 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
   return (
     <div
       className="resume-body"
-      style={{ paddingLeft: mLeft, paddingRight: mRight }}
+      style={{ paddingLeft: mLeft, paddingRight: mRight, lineHeight }}
     >
       {!hasContent ? (
         <div className="resume-empty">
@@ -49,7 +49,6 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
             <div className="r-section" style={{
               fontFamily: sectionStyles.experience.fontFamily,
               fontSize:   `${sectionStyles.experience.fontSize}px`,
-              lineHeight: sectionStyles.experience.lineHeight,
             }}>
               <div className="r-section-title">Experience</div>
               {experience.map(exp => (
@@ -66,7 +65,7 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
                     </span>
                   </div>
                   {exp.bullets.filter(b => b.trim()).length > 0 && (
-                    <ul className="r-bullets" style={{ lineHeight: sectionStyles.experience.lineHeight }}>
+                    <ul className="r-bullets">
                       {exp.bullets.filter(b => b.trim()).map((b, i) => (
                         <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>
                       ))}
@@ -81,11 +80,10 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
             <div className="r-section" style={{
               fontFamily: sectionStyles.education.fontFamily,
               fontSize:   `${sectionStyles.education.fontSize}px`,
-              lineHeight: sectionStyles.education.lineHeight,
             }}>
               <div className="r-section-title">Education</div>
               {education.map(edu => (
-                <div className="r-entry" key={edu.id}>
+                <div className="r-education-entry" key={edu.id}>
                   <div className="r-entry-header">
                     <div>
                       <span className="r-entry-role">{edu.school}</span>
@@ -132,27 +130,23 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight }) {
 // Main panel
 // ─────────────────────────────────────────────────────────
 export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
-  const measureRef  = useRef();
-  const [bodyHeight, setBodyHeight] = useState(PAGE_H_PX);
-  const [cutPoints, setCutPoints]   = useState([]); // safe Y positions for page breaks
+  const measureRef = useRef();
+  const [layout, setLayout] = useState({ bodyHeight: PAGE_H_PX, cutPoints: [] });
 
   useEffect(() => {
     const el = measureRef.current;
     if (!el) return;
 
-    const totalH = el.scrollHeight;
-    setBodyHeight(totalH);
+    const totalH  = el.scrollHeight;
+    const mT      = Math.round(pageSettings.marginTop    * INCH_PX);
+    const mB      = Math.round(pageSettings.marginBottom * INCH_PX);
+    const areaH   = PAGE_H_PX - mT - mB;
 
-    const mT    = Math.round(pageSettings.marginTop    * INCH_PX);
-    const mB    = Math.round(pageSettings.marginBottom * INCH_PX);
-    const areaH = PAGE_H_PX - mT - mB;
-    if (areaH <= 0) { setCutPoints([]); return; }
+    if (areaH <= 0) { setLayout({ bodyHeight: totalH, cutPoints: [] }); return; }
 
     const rawPages = Math.ceil(totalH / areaH);
-    if (rawPages <= 1) { setCutPoints([]); return; }
+    if (rawPages <= 1) { setLayout({ bodyHeight: totalH, cutPoints: [] }); return; }
 
-    // Measure where each line-level element ends so breaks snap between
-    // individual lines/bullets rather than entire sections or entries.
     const elements = Array.from(el.querySelectorAll(
       '.r-header, .r-section-title, .r-entry-header, .r-bullets li'
     ));
@@ -161,30 +155,28 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
 
     for (let page = 1; page < rawPages; page++) {
       const idealCut = page * areaH;
-      let bestCut    = idealCut; // fallback: cut at ideal position
+      let bestCut    = idealCut;
 
       for (const elem of elements) {
         const bottom = elem.offsetTop + elem.offsetHeight;
-        if (bottom > searchFrom && bottom <= idealCut) {
-          bestCut = bottom; // last element that fits completely on this page
-        }
+        if (bottom > searchFrom && bottom <= idealCut) bestCut = bottom;
       }
 
       newCuts.push(bestCut);
       searchFrom = bestCut;
     }
 
-    setCutPoints(newCuts);
+    setLayout({ bodyHeight: totalH, cutPoints: newCuts });
   }, [resume, sectionStyles, pageSettings]);
+
+  const { bodyHeight, cutPoints } = layout;
 
   const mTop    = Math.round(pageSettings.marginTop    * INCH_PX);
   const mBottom = Math.round(pageSettings.marginBottom * INCH_PX);
   const mLeft   = Math.round(pageSettings.marginLeft   * INCH_PX);
   const mRight  = Math.round(pageSettings.marginRight  * INCH_PX);
 
-  // How many px of content fit between top and bottom margins on one page
-  const contentAreaH = PAGE_H_PX - mTop - mBottom;
-  const numPages     = cutPoints.length + 1;
+  const numPages = cutPoints.length + 1;
 
   // Start/end content-px for each page derived from safe cut points
   const pageSlices = Array.from({ length: numPages }, (_, i) => ({
@@ -192,7 +184,8 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
     end:   i < cutPoints.length ? cutPoints[i] : bodyHeight,
   }));
 
-  const bodyProps = { resume, sectionStyles, mLeft, mRight };
+  const lineHeight = pageSettings.lineHeight ?? 1.6;
+  const bodyProps  = { resume, sectionStyles, mLeft, mRight, lineHeight };
   const hasContent = resume.personal.name || resume.personal.email ||
                      resume.experience.length > 0 || resume.education.length > 0;
 
