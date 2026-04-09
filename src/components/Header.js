@@ -23,7 +23,7 @@ export default function Header({ onUpload, uploadStatus }) {
       <div className="header-brand">
         <span className="header-logo">✦</span>
         <span className="header-title">ResumeForge</span>
-        <span className="header-tagline">Build. Preview. Download.</span>
+        <span className="header-tagline">Build it. Love it. Ship it.</span>
       </div>
       <div className="header-actions">
         {uploadStatus && (
