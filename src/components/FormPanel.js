@@ -456,6 +456,7 @@ function PageSetupForm({ settings, update }) {
     update('marginLeft', 1.0);
     update('marginRight', 1.0);
     update('lineHeight', 1.6);
+    update('colorAccents', true);
   };
 
   return (
@@ -465,6 +466,17 @@ function PageSetupForm({ settings, update }) {
         Adjust margins for your printed resume. The live preview will update in real time.
         All values are in inches.
       </p>
+
+      {/* Color Accents toggle */}
+      <div className="style-row">
+        <label className="style-label">Color</label>
+        <button
+          className={`sep-btn ${(settings.colorAccents ?? true) ? 'active' : ''}`}
+          onClick={() => update('colorAccents', !(settings.colorAccents ?? true))}
+        >
+          Color Accents
+        </button>
+      </div>
 
       {/* Visual margin diagram */}
       <div className="margin-diagram">

@@ -11,12 +11,13 @@ const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 // ─────────────────────────────────────────────────────────
 const ICONS = { email: '✉', phone: '📞', location: '📍', linkedin: 'in', website: '🌐' };
 
-function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles }) {
+function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
   const align     = personalStyles.headerAlign ?? 'left';
   const showIcons = personalStyles.showIcons ?? true;
+  const accent    = colorAccents ? '#2a6b6b' : '#1a1a1a';
 
   return (
     <div
@@ -44,7 +45,7 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personal
 
           {personal.summary && (
             <div className="r-section">
-              <div className="r-section-title">Summary</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Summary</div>
               <p className="r-summary">{personal.summary}</p>
             </div>
           )}
@@ -54,7 +55,7 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personal
               fontFamily: sectionStyles.experience.fontFamily,
               fontSize:   `${sectionStyles.experience.fontSize}px`,
             }}>
-              <div className="r-section-title">Experience</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Experience</div>
               {experience.map(exp => {
                 const bullets = exp.bullets.filter(b => b.trim());
                 return (
@@ -88,7 +89,7 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personal
               fontFamily: sectionStyles.education.fontFamily,
               fontSize:   `${sectionStyles.education.fontSize}px`,
             }}>
-              <div className="r-section-title">Education</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Education</div>
               {education.map(edu => (
                 <div className="r-education-entry" key={edu.id}>
                   <div className="r-entry-header">
@@ -110,16 +111,14 @@ function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personal
 
           {skills.length > 0 && (
             <div className="r-section">
-              <div className="r-section-title">Skills</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Skills</div>
               {sectionStyles.skills.separator === 'comma' ? (
-                <p className="r-skills-comma">
-                  {skills.join(', ')}
-                </p>
+                <p className="r-skills-comma">{skills.join(', ')}</p>
               ) : (
                 <p className="r-skills-marker">
                   {skills.map((s, i) => (
                     <span key={s}>
-                      {i > 0 && <span className="r-skill-dot">▪</span>}
+                      {i > 0 && <span className="r-skill-dot" style={{ color: accent }}>▪</span>}
                       {s}
                     </span>
                   ))}
@@ -192,8 +191,9 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
   }));
 
   const lineHeight     = pageSettings.lineHeight ?? 1.6;
+  const colorAccents   = pageSettings.colorAccents ?? true;
   const personalStyles = sectionStyles.personal ?? { headerAlign: 'left', showIcons: true };
-  const bodyProps      = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles };
+  const bodyProps      = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents };
   const hasContent = resume.personal.name || resume.personal.email ||
                      resume.experience.length > 0 || resume.education.length > 0;
 

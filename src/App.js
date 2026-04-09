@@ -107,6 +107,7 @@ const DEFAULT_PAGE_SETTINGS = {
   marginLeft: 1.0,
   marginRight: 1.0,
   lineHeight: 1.6,
+  colorAccents: true,
 };
 
 export default function App() {
