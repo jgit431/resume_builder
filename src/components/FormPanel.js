@@ -323,7 +323,9 @@ function ExperienceCard({ exp, idx, update, remove }) {
         company: exp.company,
         existingBullets: exp.bullets,
       });
-      setSuggestedBullets(bullets);
+      // Store each suggestion with its original index so accepting one
+      // doesn't shift the indices of the remaining suggestions
+      setSuggestedBullets(bullets.map((text, index) => ({ text, index })));
     } catch (err) {
       alert('AI suggestion failed: ' + err.message);
     } finally {
@@ -331,14 +333,22 @@ function ExperienceCard({ exp, idx, update, remove }) {
     }
   };
 
-  const acceptOneBullet = (bullet) => {
-    update(exp.id, 'bullets', [...exp.bullets.filter(b => b.trim()), bullet]);
-    const remaining = suggestedBullets.filter(b => b !== bullet);
-    setSuggestedBullets(remaining.length ? remaining : null);
+  const acceptOneBullet = (suggestion) => {
+    const existing = [...exp.bullets];
+    if (suggestion.index < existing.length) {
+      existing[suggestion.index] = suggestion.text;
+      update(exp.id, 'bullets', existing);
+    } else {
+      update(exp.id, 'bullets', [...existing.filter(b => b.trim()), suggestion.text]);
+    }
+    setSuggestedBullets(prev => {
+      const remaining = prev.filter(s => s.index !== suggestion.index);
+      return remaining.length ? remaining : null;
+    });
   };
 
   const acceptAllBullets = () => {
-    update(exp.id, 'bullets', suggestedBullets);
+    update(exp.id, 'bullets', suggestedBullets.map(s => s.text));
     setSuggestedBullets(null);
   };
 
@@ -402,12 +412,20 @@ function ExperienceCard({ exp, idx, update, remove }) {
                   <button className="btn-ai-discard" onClick={discardBullets}>✕ Discard</button>
                 </div>
               </div>
-              {suggestedBullets.map((b, i) => (
-                <div className="ai-bullet-row" key={i}>
-                  <span className="ai-bullet-text">• {b}</span>
-                  <button className="btn-ai-accept-one" onClick={() => acceptOneBullet(b)}>✅</button>
-                </div>
-              ))}
+              {suggestedBullets.map((s) => {
+                const isReplace = s.index < exp.bullets.filter(b => b.trim()).length;
+                return (
+                  <div className="ai-bullet-row" key={s.index}>
+                    <div className="ai-bullet-content">
+                      <span className={`ai-bullet-tag ${isReplace ? 'tag-replace' : 'tag-add'}`}>
+                        {isReplace ? `Replace #${s.index + 1}` : 'Add'}
+                      </span>
+                      <span className="ai-bullet-text">• {s.text}</span>
+                    </div>
+                    <button className="btn-ai-accept-one" onClick={() => acceptOneBullet(s)}>✅</button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
