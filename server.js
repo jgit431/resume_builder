@@ -152,4 +152,4 @@ Rules:
 
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`ResumeForge server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Cedar Resumes server running on port ${PORT}`));

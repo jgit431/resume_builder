@@ -17,6 +17,9 @@
   --radius: 12px;
   --font-display: 'DM Serif Display', serif;
   --font-body: 'DM Sans', sans-serif;
+  /* Cedar green accent — used on home page header only */
+  --cedar: #2d5a2d;
+  --cedar-light: #a8cfa8;
 }
 
 html, body {

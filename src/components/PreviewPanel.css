@@ -30,6 +30,29 @@
   color: var(--teal);
 }
 
+.preview-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-import {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-import:hover { background: var(--ink); color: var(--white); transform: translateY(-1px); }
+
 .btn-download {
   display: flex;
   align-items: center;
@@ -250,3 +273,14 @@
   font-size: 9px;
   margin: 0 4px;
 }
+
+.preview-upload-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.preview-upload-status.status-parsing { background: rgba(201,168,76,0.15); color: #a07820; }
+.preview-upload-status.status-done    { background: rgba(42,107,107,0.15); color: var(--teal); }
+.preview-upload-status.status-error   { background: rgba(200,50,50,0.1);   color: #c00; }
