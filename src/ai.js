@@ -21,6 +21,7 @@ export async function suggestSummary({ name, title, skills, experience }) {
 
 export async function suggestBullets({ role, company, existingBullets }) {
   const { bullets } = await post('/api/suggest-bullets', { role, company, existingBullets });
+  // bullets is already [{text, index}] from the server
   return bullets;
 }
 

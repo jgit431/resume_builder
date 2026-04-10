@@ -323,9 +323,7 @@ function ExperienceCard({ exp, idx, update, remove }) {
         company: exp.company,
         existingBullets: exp.bullets,
       });
-      // Store each suggestion with its original index so accepting one
-      // doesn't shift the indices of the remaining suggestions
-      setSuggestedBullets(bullets.map((text, index) => ({ text, index })));
+      setSuggestedBullets(bullets);
     } catch (err) {
       alert('AI suggestion failed: ' + err.message);
     } finally {

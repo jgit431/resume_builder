@@ -54,26 +54,46 @@ Write a strong professional summary for this person's resume.`;
 app.post('/api/suggest-bullets', async (req, res) => {
   try {
     const { role, company, existingBullets } = req.body;
+    const filled = (existingBullets ?? []).map((b, i) => ({ text: b.trim(), index: i })).filter(b => b.text);
 
-    const existing = (existingBullets ?? []).filter(b => b.trim()).join('\n');
-
-    const systemPrompt = `You are an expert resume writer. Generate exactly 3 strong, achievement-oriented bullet points for a resume job entry.
+    if (filled.length === 0) {
+      // No existing bullets — generate 3 new ones
+      const systemPrompt = `You are an expert resume writer. Generate exactly 3 strong, achievement-oriented bullet points for a resume job entry.
 Each bullet should follow the pattern: accomplished X by doing Y, resulting in Z (quantify where possible).
-Return exactly 3 bullet points, one per line, with no bullet symbols, numbers, or extra formatting — just the plain text of each bullet.`;
+Return exactly 3 bullet points, one per line, with no bullet symbols, numbers, or extra formatting.`;
+      const userPrompt = `Job Title: ${role || 'Not provided'}\nCompany: ${company || 'Not provided'}\n\nGenerate 3 strong resume bullet points.`;
+      const text = await callGroq(systemPrompt, userPrompt);
+      const bullets = text.split('\n')
+        .map((l, i) => ({ text: l.replace(/^[-•*\d.)\s]+/, '').trim(), index: i }))
+        .filter(b => b.text).slice(0, 3);
+      return res.json({ bullets });
+    }
 
+    // Improve all bullets in one prompt, preserving their numbering
+    const systemPrompt = `You are an expert resume writer. Improve each of the numbered resume bullet points below for the given role.
+For each bullet, return an improved version following this pattern: accomplished X by doing Y, resulting in Z (quantify where possible).
+Return ONLY the improved bullets, numbered exactly the same way (e.g. "1. improved text"), one per line, no extra commentary.`;
+
+    const bulletList = filled.map(b => `${b.index + 1}. ${b.text}`).join('\n');
     const userPrompt = `Job Title: ${role || 'Not provided'}
 Company: ${company || 'Not provided'}
-${existing ? `Existing bullets for context:\n${existing}` : ''}
 
-Generate 3 strong resume bullet points for this role.`;
+Bullets to improve:
+${bulletList}`;
 
     const text = await callGroq(systemPrompt, userPrompt);
 
-    const bullets = text
-      .split('\n')
-      .map(l => l.replace(/^[-•*\d.)\s]+/, '').trim())
-      .filter(Boolean)
-      .slice(0, 3);
+    // Parse "1. text" lines and map back to original indices
+    const bullets = text.split('\n')
+      .map(l => {
+        const match = l.match(/^(\d+)\.\s+(.+)/);
+        if (!match) return null;
+        const num = parseInt(match[1], 10);
+        const original = filled.find(b => b.index + 1 === num);
+        if (!original) return null;
+        return { text: match[2].trim(), index: original.index };
+      })
+      .filter(Boolean);
 
     res.json({ bullets });
   } catch (err) {
