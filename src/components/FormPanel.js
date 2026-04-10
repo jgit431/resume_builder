@@ -76,7 +76,7 @@ export default function FormPanel({
           />
         )}
         {activeSection === 'page' && (
-          <PageSetupForm settings={pageSettings} update={updatePageSetting} />
+          <PageSetupForm settings={pageSettings} update={updatePageSetting} layout={pageSettings.layout} />
         )}
       </div>
     </div>
@@ -601,7 +601,7 @@ function SkillsForm({ skills, add, remove, styles, updateStyle }) {
 }
 
 // ── Page Setup ────────────────────────────────────────────
-function PageSetupForm({ settings, update }) {
+function PageSetupForm({ settings, update, layout }) {
   const MARGIN_MIN = 0.25;
   const MARGIN_MAX = 2.0;
   const MARGIN_STEP = 0.25;
@@ -634,21 +634,23 @@ function PageSetupForm({ settings, update }) {
         </button>
       </div>
 
-      {/* Photo position — only relevant for photo templates */}
-      <div className="style-row">
-        <label className="style-label">Photo Position</label>
-        <div className="align-toggle">
-          {['left', 'right'].map(pos => (
-            <button
-              key={pos}
-              className={`align-btn ${(settings.photoPosition ?? 'left') === pos ? 'active' : ''}`}
-              onClick={() => update('photoPosition', pos)}
-            >
-              <span>{pos.charAt(0).toUpperCase() + pos.slice(1)}</span>
-            </button>
-          ))}
+      {/* Photo position — only for Executive Photo template */}
+      {layout === 'executive-photo' && (
+        <div className="style-row">
+          <label className="style-label">Photo Position</label>
+          <div className="align-toggle">
+            {['left', 'right'].map(pos => (
+              <button
+                key={pos}
+                className={`align-btn ${(settings.photoPosition ?? 'left') === pos ? 'active' : ''}`}
+                onClick={() => update('photoPosition', pos)}
+              >
+                <span>{pos.charAt(0).toUpperCase() + pos.slice(1)}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Visual margin diagram */}
       <div className="margin-diagram">
