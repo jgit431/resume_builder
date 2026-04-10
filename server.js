@@ -13,7 +13,7 @@ app.use(express.json());
 async function callGroq(systemPrompt, userPrompt) {
   const response = await groq.chat.completions.create({
     model:      'llama-3.1-8b-instant',
-    max_tokens: 512,
+    max_tokens: 2000,
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user',   content: userPrompt },
@@ -81,6 +81,75 @@ Generate 3 strong resume bullet points for this role.`;
     res.status(500).json({ error: err.message });
   }
 });
+
+// ── POST /api/parse-resume ─────────────────────────────────
+app.post('/api/parse-resume', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'No text provided' });
+
+    const systemPrompt = `You are an expert resume parser. Extract structured data from the resume text and return ONLY valid JSON with no extra text, markdown, or code fences.
+
+Return this exact structure:
+{
+  "personal": {
+    "name": "",
+    "title": "",
+    "email": "",
+    "phone": "",
+    "location": "",
+    "linkedin": "",
+    "website": "",
+    "summary": ""
+  },
+  "experience": [
+    {
+      "id": 1,
+      "company": "",
+      "role": "",
+      "startDate": "",
+      "endDate": "",
+      "current": false,
+      "bullets": [""]
+    }
+  ],
+  "education": [
+    {
+      "id": 1,
+      "school": "",
+      "degree": "",
+      "field": "",
+      "startDate": "",
+      "endDate": "",
+      "gpa": ""
+    }
+  ],
+  "skills": []
+}
+
+Rules:
+- Use empty string "" for missing fields, never null
+- current = true only if the role has no end date and appears to be ongoing
+- bullets should be an array of strings, one per accomplishment
+- skills should be a flat array of strings
+- dates should be formatted as they appear (e.g. "Jan 2020" or "2020")
+- id fields should be sequential integers starting at 1
+- Return ONLY the JSON object, nothing else`;
+
+    const text_truncated = text.slice(0, 6000); // stay within token limits
+    const raw = await callGroq(systemPrompt, `Parse this resume:\n\n${text_truncated}`);
+
+    // Strip any accidental markdown fences
+    const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const parsed = JSON.parse(clean);
+
+    res.json({ resume: parsed });
+  } catch (err) {
+    console.error('/api/parse-resume error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`ResumeForge server running on port ${PORT}`));

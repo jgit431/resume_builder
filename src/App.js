@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import FormPanel from './components/FormPanel';
 import PreviewPanel from './components/PreviewPanel';
+import { parseResume } from './ai';
 import './App.css';
 
 const DEFAULT_RESUME = {
@@ -199,14 +200,20 @@ export default function App() {
         fullText += content.items.map(item => item.str).join(' ') + '\n';
       }
 
-      // Basic text parsing heuristics
-      const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean);
-      const parsed = parseResumeText(lines, fullText);
-      setResume(parsed);
+      const parsed = await parseResume({ text: fullText });
+
+      // Ensure IDs are present on all entries
+      const withIds = {
+        ...parsed,
+        experience: (parsed.experience || []).map((e, i) => ({ ...e, id: e.id || Date.now() + i })),
+        education:  (parsed.education  || []).map((e, i) => ({ ...e, id: e.id || Date.now() + i + 100 })),
+      };
+
+      setResume(withIds);
       setUploadStatus('done');
       setTimeout(() => setUploadStatus(null), 3000);
     } catch (err) {
-      console.error(err);
+      console.error('PDF import error:', err);
       setUploadStatus('error');
       setTimeout(() => setUploadStatus(null), 3000);
     }
@@ -240,38 +247,4 @@ export default function App() {
   );
 }
 
-function parseResumeText(lines, fullText) {
-  const result = { ...DEFAULT_RESUME };
 
-  // Try to find name (first substantial line)
-  if (lines[0] && lines[0].length < 60) {
-    result.personal = { ...result.personal, name: lines[0] };
-  }
-
-  // Email
-  const emailMatch = fullText.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
-  if (emailMatch) result.personal.email = emailMatch[0];
-
-  // Phone
-  const phoneMatch = fullText.match(/(\+?1[-.\s]?)?(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/);
-  if (phoneMatch) result.personal.phone = phoneMatch[0];
-
-  // LinkedIn
-  const linkedinMatch = fullText.match(/linkedin\.com\/in\/[\w-]+/i);
-  if (linkedinMatch) result.personal.linkedin = 'https://' + linkedinMatch[0];
-
-  // Website
-  const websiteMatch = fullText.match(/(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s]*)*/i);
-  if (websiteMatch && !websiteMatch[0].includes('@') && !websiteMatch[0].includes('linkedin')) {
-    result.personal.website = websiteMatch[0];
-  }
-
-  // Skills — look for a skills section
-  const skillsIdx = lines.findIndex(l => /^skills?$/i.test(l));
-  if (skillsIdx !== -1) {
-    const skillLine = lines.slice(skillsIdx + 1, skillsIdx + 5).join(' ');
-    result.skills = skillLine.split(/[,|•·]/g).map(s => s.trim()).filter(s => s.length > 1 && s.length < 40).slice(0, 15);
-  }
-
-  return result;
-}
