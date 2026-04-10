@@ -170,6 +170,223 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 }
 
 // ─────────────────────────────────────────────────────────
+// Sidebar layout — two-column with photo, contact & skills on left
+// ─────────────────────────────────────────────────────────
+export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, colorAccents }) {
+  const { personal, experience, education, skills } = resume;
+  const accent   = colorAccents ? '#2a6b6b' : '#1a1a1a';
+  const sidebarW = '32%';
+  const sidebarBg = colorAccents ? '#f0f6f6' : '#f5f5f5';
+  const sidebarBorder = colorAccents ? '#c8e0e0' : '#ddd';
+
+  const sectionTitle = (title) => (
+    <div style={{
+      fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+      textTransform: 'uppercase', color: accent,
+      borderBottom: `1.5px solid ${accent}`,
+      paddingBottom: 3, marginBottom: 8, marginTop: 14,
+    }}>{title}</div>
+  );
+
+  return (
+    <div style={{ display: 'flex', paddingLeft: mLeft, paddingRight: mRight, lineHeight, minHeight: '100%' }}>
+      {/* ── Left sidebar ── */}
+      <div style={{ width: sidebarW, flexShrink: 0, background: sidebarBg, borderRight: `1px solid ${sidebarBorder}`, padding: '20px 16px 20px 0', boxSizing: 'border-box' }}>
+        {/* Photo */}
+        {personal.photo && (
+          <div style={{ textAlign: 'center', marginBottom: 14 }}>
+            <img src={personal.photo} alt="Headshot" style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${accent}` }} />
+          </div>
+        )}
+        {/* Name & title in sidebar for cleaner look */}
+        <div style={{ textAlign: 'center', marginBottom: 12 }}>
+          {personal.name  && <div style={{ fontWeight: 700, fontSize: 15, color: '#1a1a1a', lineHeight: 1.2 }}>{personal.name}</div>}
+          {personal.title && <div style={{ fontSize: 11, color: '#666', marginTop: 3 }}>{personal.title}</div>}
+        </div>
+
+        {/* Contact */}
+        {(personal.email || personal.phone || personal.location || personal.linkedin || personal.website) && (
+          <>
+            {sectionTitle('Contact')}
+            {[
+              personal.email    && { icon: SVG_ICONS.email(accent),    text: personal.email },
+              personal.phone    && { icon: SVG_ICONS.phone(accent),    text: personal.phone },
+              personal.location && { icon: SVG_ICONS.location(accent), text: personal.location },
+              personal.linkedin && { icon: SVG_ICONS.linkedin(accent), text: personal.linkedin.replace(/^https?:\/\/(www\.)?/, '') },
+              personal.website  && { icon: SVG_ICONS.website(accent),  text: personal.website.replace(/^https?:\/\/(www\.)?/, '') },
+            ].filter(Boolean).map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 10.5, color: '#333', marginBottom: 5, wordBreak: 'break-all' }}>
+                <span style={{ flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+                <span>{item.text}</span>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Skills */}
+        {skills.length > 0 && (
+          <>
+            {sectionTitle('Skills')}
+            {skills.map((s, i) => (
+              <div key={i} style={{ fontSize: 10.5, color: '#333', padding: '3px 0', borderBottom: '1px solid #e8e8e8' }}>{s}</div>
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* ── Right main content ── */}
+      <div style={{ flex: 1, paddingLeft: 18, paddingTop: 20, paddingBottom: 20, boxSizing: 'border-box' }}>
+        {personal.summary && (
+          <>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8 }}>Summary</div>
+            <p style={{ fontSize: 11.5, color: '#333', marginBottom: 12, lineHeight: 1.6 }}>{personal.summary}</p>
+          </>
+        )}
+
+        {experience.length > 0 && (
+          <>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8 }}>Experience</div>
+            {experience.map(exp => {
+              const bullets = exp.bullets.filter(b => b.trim());
+              return (
+                <div key={exp.id} style={{ marginBottom: 12, fontFamily: sectionStyles.experience.fontFamily, fontSize: `${sectionStyles.experience.fontSize}px` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontWeight: 700 }}>{exp.role}</span>
+                      {exp.company && <span style={{ color: '#555' }}> · {exp.company}</span>}
+                    </div>
+                    <span style={{ fontSize: 10.5, color: '#888', flexShrink: 0, marginLeft: 8 }}>
+                      {exp.startDate}{exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}{exp.current ? 'Present' : exp.endDate}
+                    </span>
+                  </div>
+                  {bullets.length > 0 && (
+                    <ul style={{ margin: '4px 0 0 14px', padding: 0 }}>
+                      {bullets.map((b, i) => (
+                        <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px`, fontSize: `${sectionStyles.experience.fontSize}px` }}>{b}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </>
+        )}
+
+        {education.length > 0 && (
+          <>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8, marginTop: 12 }}>Education</div>
+            {education.map(edu => (
+              <div key={edu.id} style={{ marginBottom: 8, fontFamily: sectionStyles.education.fontFamily, fontSize: `${sectionStyles.education.fontSize}px` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontWeight: 700 }}>{edu.school}</span>
+                    {(edu.degree || edu.field) && <span style={{ color: '#555' }}> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
+                  </div>
+                  <span style={{ fontSize: 10.5, color: '#888' }}>{edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}</span>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Executive Photo layout — classic single-column with optional circular headshot
+// ─────────────────────────────────────────────────────────
+export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents, photoPosition }) {
+  const { personal, experience, education, skills } = resume;
+  const accent     = colorAccents ? '#2a6b6b' : '#1a1a1a';
+  const align      = personalStyles.headerAlign ?? 'center';
+  const showIcons  = personalStyles.showIcons ?? true;
+  const photoSide  = photoPosition ?? 'left';
+  const PHOTO_SIZE = 72;
+
+  return (
+    <div className="resume-body" style={{ paddingLeft: mLeft, paddingRight: mRight, lineHeight }}>
+      {/* Header with optional photo */}
+      <div style={{ display: 'flex', flexDirection: photoSide === 'right' ? 'row-reverse' : 'row', alignItems: 'center', gap: 18, marginBottom: 12 }}>
+        {personal.photo && (
+          <img src={personal.photo} alt="Headshot" style={{ width: PHOTO_SIZE, height: PHOTO_SIZE, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2.5px solid ${accent}` }} />
+        )}
+        <div style={{ flex: 1, textAlign: align }}>
+          {personal.name  && <h1 className="r-name" style={{ fontFamily: sectionStyles.experience.fontFamily }}>{personal.name}</h1>}
+          {personal.title && <p className="r-title">{personal.title}</p>}
+          <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
+            {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(accent)}{personal.email}</span>}
+            {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(accent)}{personal.phone}</span>}
+            {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(accent)}{personal.location}</span>}
+            {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.linkedin(accent)}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+            {personal.website  && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.website(accent)}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+          </div>
+        </div>
+      </div>
+      <hr style={{ border: 'none', borderTop: `2px solid ${accent}`, margin: '0 0 12px 0' }} />
+
+      {/* Rest is identical to ResumeBody */}
+      {personal.summary && (
+        <div className="r-section">
+          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Summary</div>
+          <p className="r-summary">{personal.summary}</p>
+        </div>
+      )}
+      {experience.length > 0 && (
+        <div className="r-section" style={{ fontFamily: sectionStyles.experience.fontFamily, fontSize: `${sectionStyles.experience.fontSize}px` }}>
+          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Experience</div>
+          {experience.map(exp => {
+            const bullets = exp.bullets.filter(b => b.trim());
+            return (
+              <div className="r-entry" key={exp.id}>
+                <div className="r-entry-header">
+                  <div><span className="r-entry-role">{exp.role}</span>{exp.company && <span className="r-entry-company"> · {exp.company}</span>}</div>
+                  <span className="r-entry-date">{exp.startDate}{exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}{exp.current ? 'Present' : exp.endDate}</span>
+                </div>
+                {bullets.length > 0 && (
+                  <ul className="r-bullets">{bullets.map((b, i) => <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>)}</ul>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {education.length > 0 && (
+        <div className="r-section" style={{ fontFamily: sectionStyles.education.fontFamily, fontSize: `${sectionStyles.education.fontSize}px` }}>
+          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Education</div>
+          {education.map(edu => (
+            <div className="r-education-entry" key={edu.id}>
+              <div className="r-entry-header">
+                <div>
+                  <span className="r-entry-role">{edu.school}</span>
+                  {(edu.degree || edu.field) && <span className="r-entry-company"> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
+                  {edu.gpa && <span className="r-entry-company"> — GPA {edu.gpa}</span>}
+                </div>
+                <span className="r-entry-date">{edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {skills.length > 0 && (
+        <div className="r-section">
+          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Skills</div>
+          {sectionStyles.skills.separator === 'comma' ? (
+            <p className="r-skills-comma">{skills.join(', ')}</p>
+          ) : (
+            <p className="r-skills-marker">
+              {skills.map((s, i) => (
+                <span key={s}>{i > 0 && <span className="r-skill-dot" style={{ color: accent }}>▪</span>}{s}</span>
+              ))}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // Main panel
 // ─────────────────────────────────────────────────────────
 export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
@@ -230,7 +447,17 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
   const lineHeight     = pageSettings.lineHeight ?? 1.6;
   const colorAccents   = pageSettings.colorAccents ?? true;
   const personalStyles = sectionStyles.personal ?? { headerAlign: 'left', showIcons: true };
-  const bodyProps      = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents };
+  const photoPosition  = pageSettings.photoPosition ?? 'left';
+  const layoutType     = pageSettings.layout ?? 'standard';
+
+  const bodyProps = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents };
+
+  const BodyComponent = layoutType === 'sidebar'         ? SidebarBody
+                      : layoutType === 'executive-photo' ? ExecutivePhotoBody
+                      : ResumeBody;
+
+  const extraProps = layoutType === 'executive-photo' ? { photoPosition } : {};
+
   const hasContent = resume.personal.name || resume.personal.email ||
                      resume.experience.length > 0 || resume.education.length > 0;
 
@@ -313,7 +540,7 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
 
       {/* ── Hidden body for height measurement ── */}
       <div className="measure-host" ref={measureRef}>
-        <ResumeBody {...bodyProps} />
+        <BodyComponent {...bodyProps} {...extraProps} />
       </div>
 
       {/* ── Visible paginated preview ── */}
@@ -321,19 +548,13 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
         <div className="pages-stack" style={{ width: PAGE_W_PX }}>
           {Array.from({ length: numPages }, (_, i) => (
             <React.Fragment key={i}>
-              {/* White page sheet */}
               <div className="page-sheet" style={{ height: PAGE_H_PX }}>
                 <div className="page-clip" style={{ top: mTop, height: pageSlices[i].end - pageSlices[i].start }}>
-                  <div
-                    className="page-clip-inner"
-                    style={{ top: -pageSlices[i].start }}
-                  >
-                    <ResumeBody {...bodyProps} />
+                  <div className="page-clip-inner" style={{ top: -pageSlices[i].start }}>
+                    <BodyComponent {...bodyProps} {...extraProps} />
                   </div>
                 </div>
               </div>
-
-              {/* Gap + dotted rule between pages */}
               {i < numPages - 1 && (
                 <div className="page-gap">
                   <div className="page-gap-rule" />

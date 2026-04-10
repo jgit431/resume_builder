@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import FormPanel from './components/FormPanel';
 import PreviewPanel from './components/PreviewPanel';
-import HomePage, { TEMPLATES } from './components/HomePage';
+import HomePage from './components/HomePage';
+import { TEMPLATES } from './data/templates';
 import TemplatePage from './components/TemplatePage';
 import { parseResume } from './ai';
 import './App.css';
@@ -16,6 +17,7 @@ const DEFAULT_RESUME = {
     location: 'Austin, TX',
     linkedin: 'linkedin.com/in/johnsmith',
     website: 'johnsmith.dev',
+    photo: null,
     summary: 'Versatile Software Engineer with 8+ years of experience building scalable web applications and leading small engineering teams. Passionate about clean architecture, developer tooling, and shipping products that users love.',
   },
   experience: [
@@ -111,6 +113,7 @@ const DEFAULT_PAGE_SETTINGS = {
   marginRight: 1.0,
   lineHeight: 1.6,
   colorAccents: true,
+  photoPosition: 'left', // 'left' | 'right' — for Executive Photo template
 };
 
 export default function App() {

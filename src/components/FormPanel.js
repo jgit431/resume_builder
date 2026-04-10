@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './FormPanel.css';
 import { suggestSummary, suggestBullets } from '../ai';
 
@@ -42,6 +42,7 @@ export default function FormPanel({
             styles={sectionStyles.personal}
             updateStyle={(field, value) => updateSectionStyle('personal', field, value)}
             resume={resume}
+            pageSettings={pageSettings}
           />
         )}
         {activeSection === 'experience' && (
@@ -82,10 +83,21 @@ export default function FormPanel({
 }
 
 // ── Personal ──────────────────────────────────────────────
-function PersonalForm({ data, update, styles, updateStyle, resume }) {
+function PersonalForm({ data, update, styles, updateStyle, resume, pageSettings }) {
   const [styleOpen, setStyleOpen] = useState(false);
   const [suggestingSum, setSuggestingSum] = useState(false);
   const [suggestedSummary, setSuggestedSummary] = useState(null);
+  const photoRef = useRef();
+  const showPhoto = ['sidebar', 'executive-photo'].includes(pageSettings?.layout);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => update('photo', ev.target.result);
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const handleSuggestSummary = async () => {
     setSuggestingSum(true);
@@ -166,6 +178,23 @@ function PersonalForm({ data, update, styles, updateStyle, resume }) {
           </div>
         )}
       </div>
+      {showPhoto && (
+        <div className="photo-upload-row">
+          <span className="field-label">Headshot Photo <span className="field-label-hint">(optional)</span></span>
+          <div className="photo-upload-controls">
+            {data.photo && (
+              <img src={data.photo} alt="Headshot" className="photo-preview-thumb" />
+            )}
+            <button className="btn-photo-upload" onClick={() => photoRef.current.click()}>
+              {data.photo ? '↺ Change Photo' : '+ Upload Photo'}
+            </button>
+            {data.photo && (
+              <button className="btn-photo-remove" onClick={() => update('photo', null)}>✕ Remove</button>
+            )}
+            <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
+          </div>
+        </div>
+      )}
       <Field label="Full Name" value={data.name} onChange={v => update('name', v)} placeholder="John Smith" />
       <Field label="Professional Title" value={data.title} onChange={v => update('title', v)} placeholder="Senior Software Engineer" />
       <div className="field-row">
@@ -589,6 +618,22 @@ function PageSetupForm({ settings, update }) {
         >
           Color Accents
         </button>
+      </div>
+
+      {/* Photo position — only relevant for photo templates */}
+      <div className="style-row">
+        <label className="style-label">Photo Position</label>
+        <div className="align-toggle">
+          {['left', 'right'].map(pos => (
+            <button
+              key={pos}
+              className={`align-btn ${(settings.photoPosition ?? 'left') === pos ? 'active' : ''}`}
+              onClick={() => update('photoPosition', pos)}
+            >
+              <span>{pos.charAt(0).toUpperCase() + pos.slice(1)}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Visual margin diagram */}
