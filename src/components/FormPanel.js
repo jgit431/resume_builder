@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './FormPanel.css';
 import { suggestSummary, suggestBullets } from '../ai';
+import PhotoCropModal from './PhotoCropModal';
 
 const SECTIONS = [
   { id: 'personal', label: 'Personal', icon: '👤' },
@@ -87,6 +88,7 @@ function PersonalForm({ data, update, styles, updateStyle, resume, pageSettings 
   const [styleOpen, setStyleOpen] = useState(false);
   const [suggestingSum, setSuggestingSum] = useState(false);
   const [suggestedSummary, setSuggestedSummary] = useState(null);
+  const [cropSrc, setCropSrc] = useState(null);
   const photoRef = useRef();
   const showPhoto = ['sidebar', 'executive-photo'].includes(pageSettings?.layout);
 
@@ -94,9 +96,14 @@ function PersonalForm({ data, update, styles, updateStyle, resume, pageSettings 
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => update('photo', ev.target.result);
+    reader.onload = (ev) => setCropSrc(ev.target.result);
     reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleCropSave = (croppedImage) => {
+    update('photo', croppedImage);
+    setCropSrc(null);
   };
 
   const handleSuggestSummary = async () => {
@@ -127,6 +134,13 @@ function PersonalForm({ data, update, styles, updateStyle, resume, pageSettings 
 
   return (
     <div className="form-section">
+      {cropSrc && (
+        <PhotoCropModal
+          imageSrc={cropSrc}
+          onSave={handleCropSave}
+          onCancel={() => setCropSrc(null)}
+        />
+      )}
       <h2 className="section-heading">Personal Information</h2>
 
       {/* Style Options collapsible */}
