@@ -1,1 +1,11 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Environment variables — NEVER commit this
+.env
+
+# React build output
+build/
+
+# Misc
+.DS_Store

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './FormPanel.css';
+import { suggestSummary, suggestBullets } from '../ai';
 
 const SECTIONS = [
   { id: 'personal', label: 'Personal', icon: '👤' },
@@ -40,6 +41,7 @@ export default function FormPanel({
             update={updatePersonal}
             styles={sectionStyles.personal}
             updateStyle={(field, value) => updateSectionStyle('personal', field, value)}
+            resume={resume}
           />
         )}
         {activeSection === 'experience' && (
@@ -80,8 +82,30 @@ export default function FormPanel({
 }
 
 // ── Personal ──────────────────────────────────────────────
-function PersonalForm({ data, update, styles, updateStyle }) {
+function PersonalForm({ data, update, styles, updateStyle, resume }) {
   const [styleOpen, setStyleOpen] = useState(false);
+  const [suggestingSum, setSuggestingSum] = useState(false);
+  const [suggestedSummary, setSuggestedSummary] = useState(null);
+
+  const handleSuggestSummary = async () => {
+    setSuggestingSum(true);
+    try {
+      const summary = await suggestSummary({
+        name: data.name,
+        title: data.title,
+        skills: resume.skills,
+        experience: resume.experience,
+      });
+      setSuggestedSummary(summary);
+    } catch (err) {
+      alert('AI suggestion failed: ' + err.message);
+    } finally {
+      setSuggestingSum(false);
+    }
+  };
+
+  const acceptSummary  = () => { update('summary', suggestedSummary); setSuggestedSummary(null); };
+  const discardSummary = () => setSuggestedSummary(null);
 
   const reset = () => {
     updateStyle('headerAlign', 'left');
@@ -152,13 +176,31 @@ function PersonalForm({ data, update, styles, updateStyle }) {
         <Field label="LinkedIn URL" value={data.linkedin} onChange={v => update('linkedin', v)} placeholder="linkedin.com/in/jane" />
         <Field label="Website" value={data.website} onChange={v => update('website', v)} placeholder="janesmith.com" />
       </div>
-      <Field
-        label="Professional Summary"
-        value={data.summary}
-        onChange={v => update('summary', v)}
-        placeholder="A brief 2–3 sentence overview of your professional background and goals…"
-        multiline
-      />
+      <div className="ai-field-wrapper">
+        <div className="ai-field-label-row">
+          <span className="field-label">Professional Summary</span>
+          <button className="btn-ai-suggest" onClick={handleSuggestSummary} disabled={suggestingSum}>
+            {suggestingSum ? '⏳ Writing…' : '✨ Suggest'}
+          </button>
+        </div>
+        <textarea
+          className="field-input"
+          value={data.summary}
+          onChange={e => update('summary', e.target.value)}
+          placeholder="A brief 2–3 sentence overview of your professional background and goals…"
+          rows={4}
+        />
+        {suggestedSummary && (
+          <div className="ai-preview">
+            <div className="ai-preview-label">✨ AI Suggestion</div>
+            <p className="ai-preview-text">{suggestedSummary}</p>
+            <div className="ai-preview-actions">
+              <button className="btn-ai-accept" onClick={acceptSummary}>✅ Accept</button>
+              <button className="btn-ai-discard" onClick={discardSummary}>✕ Discard</button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -262,14 +304,45 @@ function ExperienceForm({ items, add, update, remove, styles, updateStyle }) {
 
 function ExperienceCard({ exp, idx, update, remove }) {
   const [open, setOpen] = useState(true);
+  const [suggestingBullets, setSuggestingBullets] = useState(false);
+  const [suggestedBullets, setSuggestedBullets] = useState(null); // null | string[]
 
   const updateBullet = (i, val) => {
     const bullets = [...exp.bullets];
     bullets[i] = val;
     update(exp.id, 'bullets', bullets);
   };
-  const addBullet = () => update(exp.id, 'bullets', [...exp.bullets, '']);
+  const addBullet    = () => update(exp.id, 'bullets', [...exp.bullets, '']);
   const removeBullet = (i) => update(exp.id, 'bullets', exp.bullets.filter((_, j) => j !== i));
+
+  const handleSuggestBullets = async () => {
+    setSuggestingBullets(true);
+    try {
+      const bullets = await suggestBullets({
+        role: exp.role,
+        company: exp.company,
+        existingBullets: exp.bullets,
+      });
+      setSuggestedBullets(bullets);
+    } catch (err) {
+      alert('AI suggestion failed: ' + err.message);
+    } finally {
+      setSuggestingBullets(false);
+    }
+  };
+
+  const acceptOneBullet = (bullet) => {
+    update(exp.id, 'bullets', [...exp.bullets.filter(b => b.trim()), bullet]);
+    const remaining = suggestedBullets.filter(b => b !== bullet);
+    setSuggestedBullets(remaining.length ? remaining : null);
+  };
+
+  const acceptAllBullets = () => {
+    update(exp.id, 'bullets', suggestedBullets);
+    setSuggestedBullets(null);
+  };
+
+  const discardBullets = () => setSuggestedBullets(null);
 
   return (
     <div className="card">
@@ -297,7 +370,12 @@ function ExperienceCard({ exp, idx, update, remove }) {
             <input type="checkbox" checked={exp.current} onChange={e => update(exp.id, 'current', e.target.checked)} />
             I currently work here
           </label>
-          <div className="bullets-label">Key Accomplishments</div>
+          <div className="ai-field-label-row">
+            <div className="bullets-label">Key Accomplishments</div>
+            <button className="btn-ai-suggest" onClick={handleSuggestBullets} disabled={suggestingBullets}>
+              {suggestingBullets ? '⏳ Writing…' : '✨ Suggest'}
+            </button>
+          </div>
           {exp.bullets.map((b, i) => (
             <div className="bullet-row" key={i}>
               <span className="bullet-dot">•</span>
@@ -314,6 +392,24 @@ function ExperienceCard({ exp, idx, update, remove }) {
             </div>
           ))}
           <button className="btn-add-bullet" onClick={addBullet}>+ Add bullet</button>
+
+          {suggestedBullets && (
+            <div className="ai-preview">
+              <div className="ai-preview-label-row">
+                <span className="ai-preview-label">✨ AI Suggestions</span>
+                <div className="ai-preview-actions">
+                  <button className="btn-ai-accept" onClick={acceptAllBullets}>✅ Accept All</button>
+                  <button className="btn-ai-discard" onClick={discardBullets}>✕ Discard</button>
+                </div>
+              </div>
+              {suggestedBullets.map((b, i) => (
+                <div className="ai-bullet-row" key={i}>
+                  <span className="ai-bullet-text">• {b}</span>
+                  <button className="btn-ai-accept-one" onClick={() => acceptOneBullet(b)}>✅</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

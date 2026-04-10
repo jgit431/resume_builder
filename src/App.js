@@ -116,7 +116,6 @@ export default function App() {
   const [pageSettings, setPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
   const [activeSection, setActiveSection] = useState('personal');
   const [uploadStatus, setUploadStatus] = useState(null);
-
   const updateSectionStyle = (section, field, value) => {
     setSectionStyles(s => ({
       ...s,

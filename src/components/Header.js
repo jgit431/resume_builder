@@ -6,9 +6,7 @@ export default function Header({ onUpload, uploadStatus }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      onUpload(file);
-    }
+    if (file && file.type === 'application/pdf') onUpload(file);
     e.target.value = '';
   };
 
