@@ -95,6 +95,7 @@ function PersonalForm({ data, update, styles, updateStyle, resume }) {
         title: data.title,
         skills: resume.skills,
         experience: resume.experience,
+        existingSummary: data.summary,
       });
       setSuggestedSummary(summary);
     } catch (err) {
@@ -180,7 +181,7 @@ function PersonalForm({ data, update, styles, updateStyle, resume }) {
         <div className="ai-field-label-row">
           <span className="field-label">Professional Summary</span>
           <button className="btn-ai-suggest" onClick={handleSuggestSummary} disabled={suggestingSum}>
-            {suggestingSum ? '⏳ Writing…' : '✨ Suggest'}
+            {suggestingSum ? '⏳ Writing…' : data.summary?.trim() ? '✨ Improve' : '✨ Suggest'}
           </button>
         </div>
         <textarea
@@ -381,7 +382,7 @@ function ExperienceCard({ exp, idx, update, remove }) {
           <div className="ai-field-label-row">
             <div className="bullets-label">Key Accomplishments</div>
             <button className="btn-ai-suggest" onClick={handleSuggestBullets} disabled={suggestingBullets}>
-              {suggestingBullets ? '⏳ Writing…' : '✨ Suggest'}
+              {suggestingBullets ? '⏳ Writing…' : exp.bullets.filter(b => b.trim()).length ? '✨ Improve' : '✨ Suggest'}
             </button>
           </div>
           {exp.bullets.map((b, i) => (

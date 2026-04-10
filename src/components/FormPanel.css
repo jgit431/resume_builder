@@ -680,6 +680,7 @@
 .btn-ai-suggest {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   background: linear-gradient(135deg, #2a6b6b, #1e5252);
   color: white;

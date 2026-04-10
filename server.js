@@ -25,17 +25,29 @@ async function callGroq(systemPrompt, userPrompt) {
 // ── POST /api/suggest-summary ──────────────────────────────
 app.post('/api/suggest-summary', async (req, res) => {
   try {
-    const { name, title, skills, experience } = req.body;
+    const { name, title, skills, experience, existingSummary } = req.body;
 
     const expSummary = (experience ?? [])
       .filter(e => e.role || e.company)
       .map(e => `${e.role} at ${e.company}`)
       .join(', ');
 
-    const systemPrompt = `You are an expert resume writer. Write a concise, professional 2-3 sentence summary for a resume.
-Write in first person without using "I". Be specific and impactful. Return only the summary text, no quotes or extra formatting.`;
+    const hasExisting = existingSummary && existingSummary.trim().length > 0;
 
-    const userPrompt = `Name: ${name || 'Not provided'}
+    const systemPrompt = hasExisting
+      ? `You are an expert resume writer. Improve the provided professional summary to make it more concise, impactful, and specific. Write in first person without using "I". Return only the improved summary text, no quotes or extra formatting.`
+      : `You are an expert resume writer. Write a concise, professional 2-3 sentence summary for a resume. Write in first person without using "I". Be specific and impactful. Return only the summary text, no quotes or extra formatting.`;
+
+    const userPrompt = hasExisting
+      ? `Name: ${name || 'Not provided'}
+Title: ${title || 'Not provided'}
+Experience: ${expSummary || 'Not provided'}
+Skills: ${(skills ?? []).join(', ') || 'Not provided'}
+
+Existing summary to improve: "${existingSummary}"
+
+Rewrite this summary to be stronger and more achievement-oriented.`
+      : `Name: ${name || 'Not provided'}
 Title: ${title || 'Not provided'}
 Experience: ${expSummary || 'Not provided'}
 Skills: ${(skills ?? []).join(', ') || 'Not provided'}

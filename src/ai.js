@@ -14,8 +14,8 @@ async function post(endpoint, body) {
   return res.json();
 }
 
-export async function suggestSummary({ name, title, skills, experience }) {
-  const { summary } = await post('/api/suggest-summary', { name, title, skills, experience });
+export async function suggestSummary({ name, title, skills, experience, existingSummary }) {
+  const { summary } = await post('/api/suggest-summary', { name, title, skills, experience, existingSummary });
   return summary;
 }
 
