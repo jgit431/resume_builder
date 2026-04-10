@@ -48,7 +48,7 @@ const SVG_ICONS = {
   ),
 };
 
-function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents }) {
+export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;

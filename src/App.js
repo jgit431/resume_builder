@@ -3,6 +3,7 @@ import Header from './components/Header';
 import FormPanel from './components/FormPanel';
 import PreviewPanel from './components/PreviewPanel';
 import HomePage, { TEMPLATES } from './components/HomePage';
+import TemplatePage from './components/TemplatePage';
 import { parseResume } from './ai';
 import './App.css';
 
@@ -113,7 +114,7 @@ const DEFAULT_PAGE_SETTINGS = {
 };
 
 export default function App() {
-  const [view, setView] = useState('home'); // 'home' | 'builder'
+  const [view, setView] = useState('home'); // 'home' | 'template-select' | 'builder'
   const [resume, setResume] = useState(DEFAULT_RESUME);
   const [sectionStyles, setSectionStyles] = useState(DEFAULT_STYLES);
   const [pageSettings, setPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
@@ -122,15 +123,14 @@ export default function App() {
 
   const goToBuilder = () => setView('builder');
 
-  const handleSelectTemplate = (template) => {
-    setResume(DEFAULT_RESUME);
-    setSectionStyles(s => ({ ...s, ...template.styles }));
-    setPageSettings(template.pageSettings);
-    goToBuilder();
+  const handleStartScratch = () => {
+    setResume({ ...DEFAULT_RESUME, personal: { name: '', title: '', email: '', phone: '', location: '', linkedin: '', website: '', summary: '' }, experience: [], education: [], skills: [] });
+    setView('template-select');
   };
 
-  const handleBlank = () => {
-    setResume({ ...DEFAULT_RESUME, personal: { ...DEFAULT_RESUME.personal, name: '', title: '', email: '', phone: '', location: '', linkedin: '', website: '', summary: '' }, experience: [], education: [], skills: [] });
+  const handleSelectTemplate = (template) => {
+    setSectionStyles(s => ({ ...s, ...template.styles }));
+    setPageSettings(template.pageSettings);
     goToBuilder();
   };
   const updateSectionStyle = (section, field, value) => {
@@ -227,7 +227,7 @@ export default function App() {
 
       setResume(withIds);
       setUploadStatus('done');
-      goToBuilder();
+      setView('template-select');
       setTimeout(() => setUploadStatus(null), 3000);
     } catch (err) {
       console.error('PDF import error:', err);
@@ -239,14 +239,22 @@ export default function App() {
   if (view === 'home') {
     return (
       <HomePage
-        onSelectTemplate={handleSelectTemplate}
+        onStartScratch={handleStartScratch}
         onImport={handleUpload}
-        onBlank={handleBlank}
         uploadStatus={uploadStatus}
       />
     );
   }
 
+  if (view === 'template-select') {
+    return (
+      <TemplatePage
+        onSelectTemplate={handleSelectTemplate}
+        onBack={() => setView('home')}
+        defaultResume={DEFAULT_RESUME}
+      />
+    );
+  }
   return (
     <div className="app">
       <Header onHome={() => setView('home')} />

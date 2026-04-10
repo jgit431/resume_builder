@@ -1,0 +1,147 @@
+.template-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+}
+
+/* ── Header ── */
+.template-page-header {
+  background: var(--cedar);
+  padding: 16px 48px;
+  display: flex;
+  align-items: center;
+}
+
+.template-page-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.template-page-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.template-page-logo-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--white);
+  letter-spacing: 0.01em;
+}
+
+/* ── Main ── */
+.template-page-main {
+  flex: 1;
+  padding: 48px 48px 64px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.template-page-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.template-page-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.template-page-subtitle {
+  font-size: 15px;
+  color: var(--ink-light);
+}
+
+/* ── Grid ── */
+.template-page-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.template-page-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.template-page-card:hover {
+  border-color: var(--teal);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+/* Clip window — shows only the scaled preview area */
+.template-preview-clip {
+  overflow: hidden;
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* The inner div is full PAGE_W_PX wide, scaled down via transform */
+.template-preview-inner {
+  background: white;
+}
+
+.template-page-info {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.template-page-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.template-page-desc {
+  font-size: 11px;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+/* ── Back button ── */
+.template-page-back {
+  align-self: flex-start;
+  background: none;
+  border: 1.5px solid var(--border);
+  color: var(--ink-light);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.template-page-back:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+@media (max-width: 900px) {
+  .template-page-grid { grid-template-columns: repeat(2, 1fr); }
+  .template-page-main { padding: 32px 24px 48px; }
+}

@@ -194,7 +194,7 @@ function TemplateThumbnail({ id }) {
 }
 
 // ── HomePage ───────────────────────────────────────────────
-export default function HomePage({ onSelectTemplate, onImport, onBlank, uploadStatus }) {
+export default function HomePage({ onStartScratch, onImport, uploadStatus }) {
   const fileRef = useRef();
 
   const handleFileChange = (e) => {
@@ -224,8 +224,13 @@ export default function HomePage({ onSelectTemplate, onImport, onBlank, uploadSt
 
       {/* ── Entry points ── */}
       <main className="home-main">
+        <div className="home-get-started">
+          <h1 className="home-get-started-title">Let's get started</h1>
+          <p className="home-get-started-sub">How would you like to build your resume?</p>
+        </div>
+
         <div className="home-actions">
-          <button className="home-action-btn blank" onClick={onBlank}>
+          <button className="home-action-btn blank" onClick={onStartScratch}>
             <span className="home-action-icon">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -235,7 +240,7 @@ export default function HomePage({ onSelectTemplate, onImport, onBlank, uploadSt
               </svg>
             </span>
             <span className="home-action-title">Start from Scratch</span>
-            <span className="home-action-desc">Build your resume step by step with a clean slate</span>
+            <span className="home-action-desc">Choose a template and build your resume step by step</span>
           </button>
 
           <button className="home-action-btn import" onClick={() => fileRef.current.click()}>
@@ -255,24 +260,6 @@ export default function HomePage({ onSelectTemplate, onImport, onBlank, uploadSt
             )}
           </button>
           <input ref={fileRef} type="file" accept="application/pdf" style={{ display: 'none' }} onChange={handleFileChange} />
-        </div>
-
-        {/* ── Templates ── */}
-        <div className="home-templates-section">
-          <h2 className="home-section-title">Or start with a template</h2>
-          <div className="home-templates-grid">
-            {TEMPLATES.map(t => (
-              <button key={t.id} className="template-card" onClick={() => onSelectTemplate(t)}>
-                <div className="template-thumb">
-                  <TemplateThumbnail id={t.id} />
-                </div>
-                <div className="template-info">
-                  <span className="template-name">{t.name}</span>
-                  <span className="template-desc">{t.description}</span>
-                </div>
-              </button>
-            ))}
-          </div>
         </div>
       </main>
 

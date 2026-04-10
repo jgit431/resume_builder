@@ -165,16 +165,16 @@ function PersonalForm({ data, update, styles, updateStyle, resume }) {
           </div>
         )}
       </div>
-      <Field label="Full Name" value={data.name} onChange={v => update('name', v)} placeholder="Jane Smith" />
-      <Field label="Professional Title" value={data.title} onChange={v => update('title', v)} placeholder="Senior Product Designer" />
+      <Field label="Full Name" value={data.name} onChange={v => update('name', v)} placeholder="John Smith" />
+      <Field label="Professional Title" value={data.title} onChange={v => update('title', v)} placeholder="Senior Software Engineer" />
       <div className="field-row">
-        <Field label="Email" value={data.email} onChange={v => update('email', v)} placeholder="jane@email.com" type="email" />
+        <Field label="Email" value={data.email} onChange={v => update('email', v)} placeholder="john@email.com" type="email" />
         <Field label="Phone" value={data.phone} onChange={v => update('phone', v)} placeholder="+1 555 000 0000" />
       </div>
       <Field label="Location" value={data.location} onChange={v => update('location', v)} placeholder="Boston, MA" />
       <div className="field-row">
-        <Field label="LinkedIn URL" value={data.linkedin} onChange={v => update('linkedin', v)} placeholder="linkedin.com/in/jane" />
-        <Field label="Website" value={data.website} onChange={v => update('website', v)} placeholder="janesmith.com" />
+        <Field label="LinkedIn URL" value={data.linkedin} onChange={v => update('linkedin', v)} placeholder="linkedin.com/in/john" />
+        <Field label="Website" value={data.website} onChange={v => update('website', v)} placeholder="johnsmith.dev" />
       </div>
       <div className="ai-field-wrapper">
         <div className="ai-field-label-row">
