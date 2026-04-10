@@ -277,7 +277,7 @@ export default function App() {
           pageSettings={pageSettings}
           updatePageSetting={updatePageSetting}
         />
-        <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} onUpload={handleUpload} uploadStatus={uploadStatus} />
+        <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} />
       </div>
     </div>
   );

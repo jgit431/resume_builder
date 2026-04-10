@@ -172,10 +172,8 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 // ─────────────────────────────────────────────────────────
 // Main panel
 // ─────────────────────────────────────────────────────────
-export default function PreviewPanel({ resume, sectionStyles, pageSettings, onUpload, uploadStatus }) {
+export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
   const measureRef = useRef();
-  const fileRef    = useRef();
-  const statusLabel = { parsing: '⏳ Parsing PDF…', done: '✅ Imported!', error: '❌ Could not parse' };
   const [layout, setLayout] = useState({ bodyHeight: PAGE_H_PX, cutPoints: [] });
 
   useEffect(() => {
@@ -302,20 +300,6 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings, onUp
           {numPages > 1 && <span className="preview-page-count"> · {numPages} pages</span>}
         </span>
         <div className="preview-toolbar-actions">
-          {uploadStatus && (
-            <span className={`preview-upload-status status-${uploadStatus}`}>
-              {statusLabel[uploadStatus]}
-            </span>
-          )}
-          <button className="btn-import" onClick={() => fileRef.current.click()}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Import Existing Resume (PDF)
-          </button>
-          <input ref={fileRef} type="file" accept="application/pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files[0]; if (f) onUpload(f); e.target.value = ''; }} />
           <button className="btn-download" onClick={handleDownload} disabled={!hasContent}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
