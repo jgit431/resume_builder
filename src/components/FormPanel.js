@@ -19,6 +19,7 @@ export default function FormPanel({
   addSkill, removeSkill,
   sectionStyles, updateSectionStyle,
   pageSettings, updatePageSetting,
+  templateFeatures = { photo: false, photoPosition: false },
 }) {
   return (
     <div className="form-panel">
@@ -43,7 +44,7 @@ export default function FormPanel({
             styles={sectionStyles.personal}
             updateStyle={(field, value) => updateSectionStyle('personal', field, value)}
             resume={resume}
-            pageSettings={pageSettings}
+            templateFeatures={templateFeatures}
           />
         )}
         {activeSection === 'experience' && (
@@ -76,7 +77,7 @@ export default function FormPanel({
           />
         )}
         {activeSection === 'page' && (
-          <PageSetupForm settings={pageSettings} update={updatePageSetting} layout={pageSettings.layout} />
+          <PageSetupForm settings={pageSettings} update={updatePageSetting} templateFeatures={templateFeatures} />
         )}
       </div>
     </div>
@@ -84,13 +85,13 @@ export default function FormPanel({
 }
 
 // ── Personal ──────────────────────────────────────────────
-function PersonalForm({ data, update, styles, updateStyle, resume, pageSettings }) {
+function PersonalForm({ data, update, styles, updateStyle, resume, templateFeatures = {} }) {
   const [styleOpen, setStyleOpen] = useState(false);
   const [suggestingSum, setSuggestingSum] = useState(false);
   const [suggestedSummary, setSuggestedSummary] = useState(null);
   const [cropSrc, setCropSrc] = useState(null);
   const photoRef = useRef();
-  const showPhoto = ['sidebar', 'executive-photo'].includes(pageSettings?.layout);
+  const showPhoto = templateFeatures.photo === true;
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -601,7 +602,7 @@ function SkillsForm({ skills, add, remove, styles, updateStyle }) {
 }
 
 // ── Page Setup ────────────────────────────────────────────
-function PageSetupForm({ settings, update, layout }) {
+function PageSetupForm({ settings, update, templateFeatures = {} }) {
   const MARGIN_MIN = 0.25;
   const MARGIN_MAX = 2.0;
   const MARGIN_STEP = 0.25;
@@ -634,8 +635,8 @@ function PageSetupForm({ settings, update, layout }) {
         </button>
       </div>
 
-      {/* Photo position — only for Executive Photo template */}
-      {layout === 'executive-photo' && (
+      {/* Photo position — only for templates with photoPosition: true */}
+      {templateFeatures.photoPosition && (
         <div className="style-row">
           <label className="style-label">Photo Position</label>
           <div className="align-toggle">

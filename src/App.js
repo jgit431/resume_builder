@@ -121,6 +121,7 @@ export default function App() {
   const [resume, setResume] = useState(DEFAULT_RESUME);
   const [sectionStyles, setSectionStyles] = useState(DEFAULT_STYLES);
   const [pageSettings, setPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
+  const [templateFeatures, setTemplateFeatures] = useState({ photo: false, photoPosition: false });
   const [activeSection, setActiveSection] = useState('personal');
   const [uploadStatus, setUploadStatus] = useState(null);
 
@@ -134,6 +135,7 @@ export default function App() {
   const handleSelectTemplate = (template) => {
     setSectionStyles(s => ({ ...s, ...template.styles }));
     setPageSettings(template.pageSettings);
+    setTemplateFeatures(template.features ?? { photo: false, photoPosition: false });
     goToBuilder();
   };
   const updateSectionStyle = (section, field, value) => {
@@ -279,6 +281,7 @@ export default function App() {
           updateSectionStyle={updateSectionStyle}
           pageSettings={pageSettings}
           updatePageSetting={updatePageSetting}
+          templateFeatures={templateFeatures}
         />
         <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} />
       </div>

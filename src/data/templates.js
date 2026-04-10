@@ -15,6 +15,10 @@ import React from 'react';
 //   2. Add a new layout: 'your-id' value
 //   3. Add it to the routing switch in PreviewPanel (layoutType check)
 //   4. Add an SVG thumbnail branch in TemplateSVG below
+//
+// features flags — control which UI options appear in the form:
+//   photo:         true = shows the headshot upload field in Personal
+//   photoPosition: true = shows the Left/Right toggle in Page Setup
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const TEMPLATES = [
@@ -22,6 +26,7 @@ export const TEMPLATES = [
     id: 'classic',
     name: 'Classic',
     description: 'Clean and traditional. Timeless for any industry.',
+    features: { photo: false, photoPosition: false },
     styles: {
       personal:   { headerAlign: 'left', showIcons: true },
       experience: { fontFamily: 'DM Sans', fontSize: 13, bulletSpacing: 3 },
@@ -34,6 +39,7 @@ export const TEMPLATES = [
     id: 'modern',
     name: 'Modern',
     description: 'Centered header, marker skills, teal accents. Bold and contemporary.',
+    features: { photo: false, photoPosition: false },
     styles: {
       personal:   { headerAlign: 'center', showIcons: true },
       experience: { fontFamily: 'DM Sans', fontSize: 13, bulletSpacing: 5 },
@@ -46,6 +52,7 @@ export const TEMPLATES = [
     id: 'executive',
     name: 'Executive',
     description: 'Georgia serif, wide margins, centered, no color. Authoritative and refined.',
+    features: { photo: false, photoPosition: false },
     styles: {
       personal:   { headerAlign: 'center', showIcons: false },
       experience: { fontFamily: 'Georgia', fontSize: 13, bulletSpacing: 6 },
@@ -58,6 +65,7 @@ export const TEMPLATES = [
     id: 'minimal',
     name: 'Minimal',
     description: 'No icons, no color, tight margins. Let the content speak.',
+    features: { photo: false, photoPosition: false },
     styles: {
       personal:   { headerAlign: 'left', showIcons: false },
       experience: { fontFamily: 'DM Sans', fontSize: 12, bulletSpacing: 2 },
@@ -70,6 +78,7 @@ export const TEMPLATES = [
     id: 'sidebar',
     name: 'Sidebar',
     description: 'Two-column layout with photo, contact & skills on the left. Great for creative roles.',
+    features: { photo: true, photoPosition: false },
     styles: {
       personal:   { headerAlign: 'left', showIcons: true },
       experience: { fontFamily: 'DM Sans', fontSize: 12, bulletSpacing: 3 },
@@ -82,6 +91,7 @@ export const TEMPLATES = [
     id: 'executive-photo',
     name: 'Executive Photo',
     description: 'Classic single-column with an optional circular headshot. Position left or right in Page Setup.',
+    features: { photo: true, photoPosition: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: false },
       experience: { fontFamily: 'Georgia', fontSize: 13, bulletSpacing: 5 },
