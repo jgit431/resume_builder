@@ -163,3 +163,20 @@
   color: var(--cedar-light);
   letter-spacing: 0.08em;
 }
+
+/* ── Compare mode banner ── */
+.template-compare-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(42, 107, 107, 0.1);
+  color: var(--teal);
+  border: 1.5px solid rgba(42, 107, 107, 0.25);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}

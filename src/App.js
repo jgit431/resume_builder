@@ -3,8 +3,10 @@ import Header from './components/Header';
 import FormPanel from './components/FormPanel';
 import PreviewPanel from './components/PreviewPanel';
 import HomePage from './components/HomePage';
+import CompareView from './components/CompareView';
 import { TEMPLATES } from './data/templates';
 import TemplatePage from './components/TemplatePage';
+import { DEFAULT_STYLES, DEFAULT_PAGE_SETTINGS, buildStylesFromTemplate } from './data/defaults';
 import { parseResume } from './ai';
 import './App.css';
 
@@ -87,52 +89,12 @@ const DEFAULT_RESUME = {
   ],
 };
 
-const DEFAULT_STYLES = {
-  personal: {
-    headerAlign: 'left',
-    showIcons: true,
-    iconColor: 'default',
-    headerFont: 'DM Serif Display',
-    headerNameSize: 32,
-    headerContactSize: 12,
-  },
-  experience: {
-    fontFamily: 'DM Sans',
-    fontSize: 13,
-    bulletSpacing: 3,
-    formatting: {
-      role:    { bold: true,  italic: false, underline: false },
-      company: { bold: false, italic: false, underline: false },
-      date:    { bold: false, italic: false, underline: false },
-    },
-  },
-  education: {
-    fontFamily: 'DM Sans',
-    fontSize: 13,
-    formatting: {
-      school: { bold: false, italic: false, underline: false },
-      degree: { bold: false, italic: false, underline: false },
-      date:   { bold: false, italic: false, underline: false },
-    },
-  },
-  skills: {
-    separator: 'comma',
-    formatting: { bold: false, italic: false, underline: false },
-  },
-};
-
-const DEFAULT_PAGE_SETTINGS = {
-  marginTop: 1.0,
-  marginBottom: 1.0,
-  marginLeft: 1.0,
-  marginRight: 1.0,
-  lineHeight: 1.6,
-  colorScheme: 'teal', // replaces colorAccents boolean
-  photoPosition: 'left',
-};
-
 export default function App() {
-  const [view, setView] = useState('home'); // 'home' | 'template-select' | 'builder'
+  const [view, setView] = useState('home'); // 'home' | 'template-select' | 'builder' | 'compare'
+  const [compareMode, setCompareMode] = useState(false); // true when template-select is opened for compare
+  const [compareTarget, setCompareTarget] = useState(null); // { template, styles, pageSettings }
+  const [currentTemplateName, setCurrentTemplateName] = useState('Classic');
+
   const [resume, setResume] = useState(DEFAULT_RESUME);
   const [sectionStyles, setSectionStyles] = useState(DEFAULT_STYLES);
   const [pageSettings, setPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
@@ -143,36 +105,69 @@ export default function App() {
 
   const goToBuilder = () => setView('builder');
 
+  // ── Apply a template's styles/settings to the live resume ──
+  const applyTemplate = (template) => {
+    const merged = buildStylesFromTemplate(template);
+    setSectionStyles(merged);
+    setPageSettings(template.pageSettings);
+    setTemplateFeatures(template.features ?? { photo: false, photoPosition: false });
+    setTemplateDefaultStyles({ ...DEFAULT_STYLES, ...merged });
+    setCurrentTemplateName(template.name);
+  };
+
   const handleStartScratch = () => {
-    setResume({ ...DEFAULT_RESUME, personal: { name: '', title: '', email: '', phone: '', location: '', linkedin: '', website: '', photo: null, summary: '' }, experience: [], education: [], skills: [] });
+    setResume({
+      ...DEFAULT_RESUME,
+      personal: { name: '', title: '', email: '', phone: '', location: '', linkedin: '', website: '', photo: null, summary: '' },
+      experience: [],
+      education: [],
+      skills: [],
+    });
+    setCompareMode(false);
     setView('template-select');
   };
 
+  // ── Called when user clicks a card on TemplatePage ──
   const handleSelectTemplate = (template) => {
-    // Deep merge all sections so keys from DEFAULT_STYLES are always preserved
-    setSectionStyles(s => ({
-      ...s,
-      personal:   { ...DEFAULT_STYLES.personal,   ...template.styles.personal   },
-      experience: { ...DEFAULT_STYLES.experience, ...template.styles.experience },
-      education:  { ...DEFAULT_STYLES.education,  ...template.styles.education  },
-      skills:     { ...DEFAULT_STYLES.skills,      ...template.styles.skills     },
-    }));
-    setPageSettings(template.pageSettings);
-    setTemplateFeatures(template.features ?? { photo: false, photoPosition: false });
-    setTemplateDefaultStyles({
-      ...DEFAULT_STYLES,
-      personal:   { ...DEFAULT_STYLES.personal,   ...template.styles.personal   },
-      experience: { ...DEFAULT_STYLES.experience, ...template.styles.experience },
-      education:  { ...DEFAULT_STYLES.education,  ...template.styles.education  },
-      skills:     { ...DEFAULT_STYLES.skills,      ...template.styles.skills     },
-    });
+    if (compareMode) {
+      // Compare mode: don't apply — just store and show compare view
+      setCompareMode(false);
+      setCompareTarget({
+        template,
+        styles:       buildStylesFromTemplate(template),
+        pageSettings: template.pageSettings,
+      });
+      setView('compare');
+      return;
+    }
+    // Normal select: apply and go to builder
+    applyTemplate(template);
     goToBuilder();
   };
+
+  // ── "Compare Template" button from PreviewPanel ──
+  const handleOpenCompare = () => {
+    setCompareMode(true);
+    setView('template-select');
+  };
+
+  // ── Compare view: keep current ──
+  const handleKeepCurrent = () => {
+    setCompareTarget(null);
+    setView('builder');
+  };
+
+  // ── Compare view: switch to proposed ──
+  const handleSwitchTemplate = () => {
+    if (compareTarget) {
+      applyTemplate(compareTarget.template);
+    }
+    setCompareTarget(null);
+    setView('builder');
+  };
+
   const updateSectionStyle = (section, field, value) => {
-    setSectionStyles(s => ({
-      ...s,
-      [section]: { ...s[section], [field]: value },
-    }));
+    setSectionStyles(s => ({ ...s, [section]: { ...s[section], [field]: value } }));
   };
 
   const updatePageSetting = (field, value) => {
@@ -186,18 +181,12 @@ export default function App() {
   const addExperience = () => {
     setResume(r => ({
       ...r,
-      experience: [...r.experience, {
-        id: Date.now(),
-        company: '', role: '', startDate: '', endDate: '', current: false, bullets: [''],
-      }],
+      experience: [...r.experience, { id: Date.now(), company: '', role: '', startDate: '', endDate: '', current: false, bullets: [''] }],
     }));
   };
 
   const updateExperience = (id, field, value) => {
-    setResume(r => ({
-      ...r,
-      experience: r.experience.map(e => e.id === id ? { ...e, [field]: value } : e),
-    }));
+    setResume(r => ({ ...r, experience: r.experience.map(e => e.id === id ? { ...e, [field]: value } : e) }));
   };
 
   const removeExperience = (id) => {
@@ -207,18 +196,12 @@ export default function App() {
   const addEducation = () => {
     setResume(r => ({
       ...r,
-      education: [...r.education, {
-        id: Date.now(),
-        school: '', degree: '', field: '', startDate: '', endDate: '', gpa: '',
-      }],
+      education: [...r.education, { id: Date.now(), school: '', degree: '', field: '', startDate: '', endDate: '', gpa: '' }],
     }));
   };
 
   const updateEducation = (id, field, value) => {
-    setResume(r => ({
-      ...r,
-      education: r.education.map(e => e.id === id ? { ...e, [field]: value } : e),
-    }));
+    setResume(r => ({ ...r, education: r.education.map(e => e.id === id ? { ...e, [field]: value } : e) }));
   };
 
   const removeEducation = (id) => {
@@ -253,7 +236,6 @@ export default function App() {
 
       const parsed = await parseResume({ text: fullText });
 
-      // Ensure IDs are present on all entries
       const withIds = {
         ...parsed,
         experience: (parsed.experience || []).map((e, i) => ({ ...e, id: e.id || Date.now() + i })),
@@ -271,6 +253,7 @@ export default function App() {
     }
   };
 
+  // ── Views ──────────────────────────────────────────────
   if (view === 'home') {
     return (
       <HomePage
@@ -284,12 +267,33 @@ export default function App() {
   if (view === 'template-select') {
     return (
       <TemplatePage
+        compareMode={compareMode}
         onSelectTemplate={handleSelectTemplate}
-        onBack={() => setView('home')}
+        onBack={() => {
+          setCompareMode(false);
+          setView(compareMode ? 'builder' : 'home');
+        }}
         defaultResume={DEFAULT_RESUME}
       />
     );
   }
+
+  if (view === 'compare' && compareTarget) {
+    return (
+      <CompareView
+        resume={resume}
+        currentStyles={sectionStyles}
+        currentPageSettings={pageSettings}
+        currentTemplateName={currentTemplateName}
+        proposedTemplate={compareTarget.template}
+        proposedStyles={compareTarget.styles}
+        proposedPageSettings={compareTarget.pageSettings}
+        onKeep={handleKeepCurrent}
+        onSwitch={handleSwitchTemplate}
+      />
+    );
+  }
+
   return (
     <div className="app">
       <Header onHome={() => setView('home')} />
@@ -314,10 +318,14 @@ export default function App() {
           templateFeatures={templateFeatures}
           templateDefaultStyles={templateDefaultStyles}
         />
-        <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} onChangeTemplate={() => setView('template-select')} />
+        <PreviewPanel
+          resume={resume}
+          sectionStyles={sectionStyles}
+          pageSettings={pageSettings}
+          onChangeTemplate={() => setView('template-select')}
+          onCompareTemplate={handleOpenCompare}
+        />
       </div>
     </div>
   );
 }
-
-

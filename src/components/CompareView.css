@@ -1,0 +1,182 @@
+/* ── Compare page shell ── */
+.compare-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #ddd8cf;
+}
+
+/* ── Top bar ── */
+.compare-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: var(--cream-dark);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.compare-topbar-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.compare-topbar-hint {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ── Scroll area ── */
+.compare-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 28px 24px 120px;
+}
+
+/* ── Side-by-side columns ── */
+.compare-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.compare-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Column header ── */
+.compare-col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compare-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.compare-badge.current {
+  background: var(--cream-dark);
+  color: var(--ink-faint);
+  border: 1.5px solid var(--border);
+}
+
+.compare-badge.proposed {
+  background: rgba(42, 107, 107, 0.12);
+  color: var(--teal);
+  border: 1.5px solid rgba(42, 107, 107, 0.3);
+}
+
+.compare-col-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── Preview wrapper ── */
+.compare-preview-wrap {
+  /* width + height set inline via JS based on scale */
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  border-radius: 2px;
+}
+
+.compare-preview-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  /* width: 650px and transform: scale(X) set inline */
+}
+
+/* ── Fixed bottom action bar ── */
+.compare-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 32px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+  z-index: 50;
+}
+
+.compare-action-hint {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-right: 8px;
+}
+
+.btn-keep-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-keep-current:hover {
+  border-color: var(--ink);
+}
+
+.btn-switch-template {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-switch-template:hover {
+  background: #1e5252;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(42, 107, 107, 0.3);
+}
+
+/* ── Divider arrow ── */
+.compare-divider-arrow {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 40px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}

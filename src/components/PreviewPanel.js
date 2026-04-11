@@ -464,7 +464,7 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
 // ─────────────────────────────────────────────────────────
 // Main panel
 // ─────────────────────────────────────────────────────────
-export default function PreviewPanel({ resume, sectionStyles, pageSettings, onChangeTemplate }) {
+export default function PreviewPanel({ resume, sectionStyles, pageSettings, onChangeTemplate, onCompareTemplate }) {
   const measureRef = useRef();
   const [layout, setLayout] = useState({ bodyHeight: PAGE_H_PX, cutPoints: [] });
 
@@ -602,6 +602,12 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings, onCh
           {numPages > 1 && <span className="preview-page-count"> · {numPages} pages</span>}
         </span>
         <div className="preview-toolbar-actions">
+          <button className="btn-compare-template" onClick={onCompareTemplate} disabled={!hasContent} title="Compare templates side by side">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <rect x="2" y="3" width="9" height="18" rx="1"/><rect x="13" y="3" width="9" height="18" rx="1"/>
+            </svg>
+            Compare
+          </button>
           <button className="btn-change-template" onClick={onChangeTemplate}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>

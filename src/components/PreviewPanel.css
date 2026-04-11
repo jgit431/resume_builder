@@ -292,7 +292,7 @@
   background: transparent;
   color: var(--ink);
   border: 1.5px solid var(--ink);
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -304,4 +304,30 @@
   background: var(--ink);
   color: var(--white);
   transform: translateY(-1px);
+}
+
+.btn-compare-template {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  color: var(--teal);
+  border: 1.5px solid var(--teal);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-compare-template:hover:not(:disabled) {
+  background: var(--teal);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-compare-template:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
