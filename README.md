@@ -1,6 +1,6 @@
 # Cedar Resumes
 
-A full-stack AI-powered resume builder with live preview, PDF export, multiple layout templates, and headshot support.
+A full-stack AI-powered resume builder with live preview, PDF export, multiple layout templates, headshot support, and side-by-side template comparison.
 
 ---
 
@@ -94,21 +94,25 @@ Runs the AI API server at **http://localhost:3001**
 resume_builder/
 ├── public/
 │   └── logos/
-│       └── logo.png              # App logo (circular, no words)
+│       └── logo.png                  # App logo (circular, no words)
 ├── src/
-│   ├── App.js                    # Root component, state, routing
-│   ├── ai.js                     # Frontend AI API calls
+│   ├── App.js                        # Root component, state, routing
+│   ├── ai.js                         # Frontend AI API calls
 │   ├── data/
-│   │   └── templates.js          # All templates + SVG thumbnails (edit here to add/remove templates)
+│   │   ├── templates.js              # All templates + SVG thumbnails
+│   │   ├── colorSchemes.js           # Color scheme definitions
+│   │   └── defaults.js               # Shared default styles and page settings
 │   └── components/
-│       ├── Header.js / .css      # Builder page header
-│       ├── HomePage.js / .css    # Landing page
-│       ├── TemplatePage.js / .css # Template selection page
-│       ├── FormPanel.js / .css   # Resume editing form
-│       └── PreviewPanel.js / .css # Live preview + PDF export
-├── server.js                     # Express backend (AI endpoints)
-├── .env                          # Your API keys (not committed)
-├── .env.example                  # Template for .env
+│       ├── Header.js / .css          # Builder page header
+│       ├── HomePage.js / .css        # Landing page
+│       ├── TemplatePage.js / .css    # Template selection page (also used in compare mode)
+│       ├── FormPanel.js / .css       # Resume editing form
+│       ├── PreviewPanel.js / .css    # Live preview + PDF export
+│       ├── CompareView.js / .css     # Side-by-side template comparison
+│       └── PhotoCropModal.js / .css  # Circular headshot crop modal
+├── server.js                         # Express backend (AI endpoints)
+├── .env                              # Your API keys (not committed)
+├── .env.example                      # Template for .env
 ├── package.json
 └── package-lock.json
 ```
@@ -125,7 +129,21 @@ All templates are defined in **`src/data/templates.js`**. This is the only file 
 
 For style-only templates (font, alignment, spacing, color), set `layout: 'standard'` and only edit `styles` and `pageSettings`. No other files need to change.
 
-For a new layout (e.g. a colored header band or three-column), you'd also need to build a body component in `PreviewPanel.js`.
+For a new layout (e.g. a colored header band or three-column), you'd also need to build a body component in `PreviewPanel.js` and add a thumbnail branch in the `TemplateSVG` function in `templates.js`.
+
+---
+
+## Compare Templates
+
+The builder includes a side-by-side template comparison tool so you can see how your resume looks in a different template before committing to it.
+
+**Flow:**
+1. In the builder, click **Compare** in the preview toolbar
+2. The template picker opens in compare mode — select any template to compare against
+3. Your resume is shown in both templates simultaneously, paginated correctly for each
+4. Click **Keep [Current]** to go back unchanged, or **Switch to [Template]** to apply the new template
+
+The comparison view paginates each template independently — if one layout fits your resume in 2 pages and another takes 3, both are shown in full.
 
 ---
 
