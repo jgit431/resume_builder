@@ -52,6 +52,12 @@
   gap: 10px;
   line-height: 1.1;
   user-select: none;
+  border-bottom: 2px dashed transparent;
+  transition: border-color 0.2s;
+}
+
+.proj-home-name:hover {
+  border-bottom-color: var(--ink-faint);
 }
 
 .proj-home-name:hover .proj-home-name-pencil {
