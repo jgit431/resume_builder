@@ -888,3 +888,93 @@
 }
 
 .btn-photo-remove:hover { border-color: #c00; color: #c00; }
+
+/* ── B/I/U formatting toggles ── */
+.fmt-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.fmt-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: Georgia, serif;
+  color: var(--ink);
+  transition: all 0.15s;
+}
+
+.fmt-btn:hover { border-color: var(--teal); color: var(--teal); }
+.fmt-btn.active { background: var(--teal); border-color: var(--teal); color: white; }
+
+/* ── Color scheme swatches ── */
+.color-scheme-row {
+  align-items: center;
+}
+
+.color-scheme-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  outline: none;
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch.active {
+  border-color: var(--ink);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ink);
+}
+
+/* ── Inline B/I/U field layout ── */
+.field-with-fmt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.field-label-row-fmt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fmt-toggle.inline {
+  display: flex;
+  gap: 3px;
+}
+
+.skills-fmt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 4px;
+}
+
+/* ── Grouped date fields with shared B/I/U label ── */
+.field-group-with-fmt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}

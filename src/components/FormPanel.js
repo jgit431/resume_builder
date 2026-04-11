@@ -20,6 +20,7 @@ export default function FormPanel({
   sectionStyles, updateSectionStyle,
   pageSettings, updatePageSetting,
   templateFeatures = { photo: false, photoPosition: false },
+  templateDefaultStyles,
 }) {
   return (
     <div className="form-panel">
@@ -55,6 +56,7 @@ export default function FormPanel({
             remove={removeExperience}
             styles={sectionStyles.experience}
             updateStyle={(field, value) => updateSectionStyle('experience', field, value)}
+            defaultStyles={templateDefaultStyles?.experience}
           />
         )}
         {activeSection === 'education' && (
@@ -65,6 +67,7 @@ export default function FormPanel({
             remove={removeEducation}
             styles={sectionStyles.education}
             updateStyle={(field, value) => updateSectionStyle('education', field, value)}
+            defaultStyles={templateDefaultStyles?.education}
           />
         )}
         {activeSection === 'skills' && (
@@ -74,6 +77,8 @@ export default function FormPanel({
             remove={removeSkill}
             styles={sectionStyles.skills}
             updateStyle={(field, value) => updateSectionStyle('skills', field, value)}
+            defaultStyles={templateDefaultStyles?.skills}
+            templateFeatures={templateFeatures}
           />
         )}
         {activeSection === 'page' && (
@@ -157,24 +162,26 @@ function PersonalForm({ data, update, styles, updateStyle, resume, templateFeatu
           <div className="style-toolbar-body">
 
             {/* Header alignment */}
-            <div className="style-row">
-              <label className="style-label">Header Alignment</label>
-              <div className="align-toggle">
-                {['left', 'center', 'right'].map(align => (
-                  <button
-                    key={align}
-                    className={`align-btn ${styles.headerAlign === align ? 'active' : ''}`}
-                    onClick={() => updateStyle('headerAlign', align)}
-                    title={align.charAt(0).toUpperCase() + align.slice(1)}
-                  >
-                    {align === 'left'   && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>}
-                    {align === 'center' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>}
-                    {align === 'right'  && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>}
-                    <span>{align.charAt(0).toUpperCase() + align.slice(1)}</span>
-                  </button>
-                ))}
+            {templateFeatures.headerAlign !== false && (
+              <div className="style-row">
+                <label className="style-label">Header Alignment</label>
+                <div className="align-toggle">
+                  {['left', 'center', 'right'].map(align => (
+                    <button
+                      key={align}
+                      className={`align-btn ${styles.headerAlign === align ? 'active' : ''}`}
+                      onClick={() => updateStyle('headerAlign', align)}
+                      title={align.charAt(0).toUpperCase() + align.slice(1)}
+                    >
+                      {align === 'left'   && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>}
+                      {align === 'center' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>}
+                      {align === 'right'  && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>}
+                      <span>{align.charAt(0).toUpperCase() + align.slice(1)}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Icons toggle */}
             <div className="style-row">
@@ -260,13 +267,17 @@ const FONT_OPTIONS = [
   { label: 'Courier New', value: 'Courier New, monospace' },
 ];
 
-function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
+function StyleToolbar({ styles, updateStyle, showBulletSpacing = false, defaultStyles }) {
   const [open, setOpen] = useState(false);
 
   const reset = () => {
-    updateStyle('fontFamily', 'DM Sans');
-    updateStyle('fontSize', 13);
-    if (showBulletSpacing) updateStyle('bulletSpacing', 3);
+    updateStyle('fontFamily', defaultStyles?.fontFamily ?? 'DM Sans');
+    updateStyle('fontSize',   defaultStyles?.fontSize   ?? 13);
+    if (showBulletSpacing) updateStyle('bulletSpacing', defaultStyles?.bulletSpacing ?? 3);
+    // Reset formatting to template defaults, not hardcoded false
+    if (styles.formatting) {
+      updateStyle('formatting', defaultStyles?.formatting ?? styles.formatting);
+    }
   };
 
   return (
@@ -297,7 +308,7 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
 
           {/* Font Size */}
           <div className="style-row">
-            <label className="style-label">Size <span className="style-value">{styles.fontSize}px</span></label>
+            <label className="style-label">Body Text <span className="style-value">{styles.fontSize}px</span></label>
             <input
               type="range" min={10} max={16} step={0.5}
               value={styles.fontSize}
@@ -306,7 +317,7 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
             />
           </div>
 
-          {/* Bullet Spacing (only for experience) */}
+          {/* Bullet Spacing */}
           {showBulletSpacing && (
             <div className="style-row">
               <label className="style-label">Bullet Spacing <span className="style-value">{styles.bulletSpacing}px</span></label>
@@ -329,16 +340,16 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false }) {
 }
 
 // ── Experience ────────────────────────────────────────────
-function ExperienceForm({ items, add, update, remove, styles, updateStyle }) {
+function ExperienceForm({ items, add, update, remove, styles, updateStyle, defaultStyles }) {
   return (
     <div className="form-section">
       <h2 className="section-heading">Work Experience</h2>
-      <StyleToolbar styles={styles} updateStyle={updateStyle} showBulletSpacing={true} />
+      <StyleToolbar styles={styles} updateStyle={updateStyle} showBulletSpacing={true} defaultStyles={defaultStyles} />
       {items.length === 0 && (
         <p className="empty-hint">No experience added yet. Click the button below to add your first role.</p>
       )}
       {items.map((exp, idx) => (
-        <ExperienceCard key={exp.id} exp={exp} idx={idx} update={update} remove={remove} />
+        <ExperienceCard key={exp.id} exp={exp} idx={idx} update={update} remove={remove} styles={styles} updateStyle={updateStyle} />
       ))}
       <button className="btn-add" onClick={add}>
         <span>+</span> Add Experience
@@ -347,10 +358,35 @@ function ExperienceForm({ items, add, update, remove, styles, updateStyle }) {
   );
 }
 
-function ExperienceCard({ exp, idx, update, remove }) {
+function ExperienceCard({ exp, idx, update, remove, styles, updateStyle }) {
   const [open, setOpen] = useState(true);
   const [suggestingBullets, setSuggestingBullets] = useState(false);
-  const [suggestedBullets, setSuggestedBullets] = useState(null); // null | string[]
+  const [suggestedBullets, setSuggestedBullets] = useState(null);
+
+  const toggleFmt = (field, prop) => {
+    const current = styles?.formatting?.[field] ?? {};
+    updateStyle('formatting', {
+      ...styles?.formatting,
+      [field]: { ...current, [prop]: !current[prop] },
+    });
+  };
+
+  const FmtBtns = ({ field }) => (
+    <div className="fmt-toggle inline">
+      {['bold', 'italic', 'underline'].map(prop => (
+        <button
+          key={prop}
+          className={`fmt-btn ${styles?.formatting?.[field]?.[prop] ? 'active' : ''}`}
+          onClick={() => toggleFmt(field, prop)}
+          title={prop}
+        >
+          {prop === 'bold' && <b>B</b>}
+          {prop === 'italic' && <i>I</i>}
+          {prop === 'underline' && <u>U</u>}
+        </button>
+      ))}
+    </div>
+  );
 
   const updateBullet = (i, val) => {
     const bullets = [...exp.bullets];
@@ -412,12 +448,30 @@ function ExperienceCard({ exp, idx, update, remove }) {
       {open && (
         <div className="card-body">
           <div className="field-row">
-            <Field label="Company" value={exp.company} onChange={v => update(exp.id, 'company', v)} placeholder="Acme Corp" />
-            <Field label="Job Title" value={exp.role} onChange={v => update(exp.id, 'role', v)} placeholder="Product Manager" />
+            <div className="field-with-fmt">
+              <div className="field-label-row-fmt">
+                <span className="field-label">Company</span>
+                <FmtBtns field="company" />
+              </div>
+              <input className="field-input" value={exp.company} onChange={e => update(exp.id, 'company', e.target.value)} placeholder="Acme Corp" />
+            </div>
+            <div className="field-with-fmt">
+              <div className="field-label-row-fmt">
+                <span className="field-label">Job Title</span>
+                <FmtBtns field="role" />
+              </div>
+              <input className="field-input" value={exp.role} onChange={e => update(exp.id, 'role', e.target.value)} placeholder="Product Manager" />
+            </div>
           </div>
-          <div className="field-row">
-            <Field label="Start Date" value={exp.startDate} onChange={v => update(exp.id, 'startDate', v)} placeholder="Jan 2022" />
-            <Field label="End Date" value={exp.endDate} onChange={v => update(exp.id, 'endDate', v)} placeholder="Present" disabled={exp.current} />
+          <div className="field-group-with-fmt">
+            <div className="field-label-row-fmt">
+              <span className="field-label">Dates</span>
+              <FmtBtns field="date" />
+            </div>
+            <div className="field-row">
+              <input className="field-input" value={exp.startDate} onChange={e => update(exp.id, 'startDate', e.target.value)} placeholder="Jan 2022" />
+              <input className="field-input" value={exp.endDate} onChange={e => update(exp.id, 'endDate', e.target.value)} placeholder="Present" disabled={exp.current} />
+            </div>
           </div>
           <label className="checkbox-label">
             <input type="checkbox" checked={exp.current} onChange={e => update(exp.id, 'current', e.target.checked)} />
@@ -478,11 +532,36 @@ function ExperienceCard({ exp, idx, update, remove }) {
 }
 
 // ── Education ─────────────────────────────────────────────
-function EducationForm({ items, add, update, remove, styles, updateStyle }) {
+function EducationForm({ items, add, update, remove, styles, updateStyle, defaultStyles }) {
+  const toggleFmt = (field, prop) => {
+    const current = styles?.formatting?.[field] ?? {};
+    updateStyle('formatting', {
+      ...styles?.formatting,
+      [field]: { ...current, [prop]: !current[prop] },
+    });
+  };
+
+  const FmtBtns = ({ field }) => (
+    <div className="fmt-toggle inline">
+      {['bold', 'italic', 'underline'].map(prop => (
+        <button
+          key={prop}
+          className={`fmt-btn ${styles?.formatting?.[field]?.[prop] ? 'active' : ''}`}
+          onClick={() => toggleFmt(field, prop)}
+          title={prop}
+        >
+          {prop === 'bold' && <b>B</b>}
+          {prop === 'italic' && <i>I</i>}
+          {prop === 'underline' && <u>U</u>}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="form-section">
       <h2 className="section-heading">Education</h2>
-      <StyleToolbar styles={styles} updateStyle={updateStyle} showBulletSpacing={false} />
+      <StyleToolbar styles={styles} updateStyle={updateStyle} showBulletSpacing={false} defaultStyles={defaultStyles} />
       {items.length === 0 && (
         <p className="empty-hint">No education added yet.</p>
       )}
@@ -496,15 +575,33 @@ function EducationForm({ items, add, update, remove, styles, updateStyle }) {
             <button className="btn-icon" onClick={() => remove(edu.id)}>✕</button>
           </div>
           <div className="card-body">
-            <Field label="School / University" value={edu.school} onChange={v => update(edu.id, 'school', v)} placeholder="MIT" />
-            <div className="field-row">
-              <Field label="Degree" value={edu.degree} onChange={v => update(edu.id, 'degree', v)} placeholder="B.S." />
-              <Field label="Field of Study" value={edu.field} onChange={v => update(edu.id, 'field', v)} placeholder="Computer Science" />
+            <div className="field-group-with-fmt">
+              <div className="field-label-row-fmt">
+                <span className="field-label">Degree &amp; Field of Study</span>
+                <FmtBtns field="degree" />
+              </div>
+              <div className="field-row">
+                <input className="field-input" value={edu.degree} onChange={e => update(edu.id, 'degree', e.target.value)} placeholder="B.S." />
+                <input className="field-input" value={edu.field} onChange={e => update(edu.id, 'field', e.target.value)} placeholder="Computer Science" />
+              </div>
             </div>
-            <div className="field-row">
-              <Field label="Start Year" value={edu.startDate} onChange={v => update(edu.id, 'startDate', v)} placeholder="2018" />
-              <Field label="End Year" value={edu.endDate} onChange={v => update(edu.id, 'endDate', v)} placeholder="2022" />
-              <Field label="GPA (optional)" value={edu.gpa} onChange={v => update(edu.id, 'gpa', v)} placeholder="3.8" />
+            <div className="field-with-fmt">
+              <div className="field-label-row-fmt">
+                <span className="field-label">School / University</span>
+                <FmtBtns field="school" />
+              </div>
+              <input className="field-input" value={edu.school} onChange={e => update(edu.id, 'school', e.target.value)} placeholder="MIT" />
+            </div>
+            <div className="field-group-with-fmt">
+              <div className="field-label-row-fmt">
+                <span className="field-label">Dates</span>
+                <FmtBtns field="date" />
+              </div>
+              <div className="field-row">
+                <input className="field-input" value={edu.startDate} onChange={e => update(edu.id, 'startDate', e.target.value)} placeholder="Sept 2020" />
+                <input className="field-input" value={edu.endDate} onChange={e => update(edu.id, 'endDate', e.target.value)} placeholder="May 2024" />
+                <Field label="GPA (optional)" value={edu.gpa} onChange={v => update(edu.id, 'gpa', v)} placeholder="3.8" />
+              </div>
             </div>
           </div>
         </div>
@@ -517,7 +614,7 @@ function EducationForm({ items, add, update, remove, styles, updateStyle }) {
 }
 
 // ── Skills ────────────────────────────────────────────────
-function SkillsForm({ skills, add, remove, styles, updateStyle }) {
+function SkillsForm({ skills, add, remove, styles, updateStyle, defaultStyles, templateFeatures = {} }) {
   const [input, setInput] = useState('');
   const [styleOpen, setStyleOpen] = useState(false);
 
@@ -531,6 +628,13 @@ function SkillsForm({ skills, add, remove, styles, updateStyle }) {
       e.preventDefault();
       handleAdd();
     }
+  };
+
+  const toggleFmt = (prop) => {
+    updateStyle('formatting', {
+      ...styles?.formatting,
+      [prop]: !styles?.formatting?.[prop],
+    });
   };
 
   const SUGGESTIONS = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'TypeScript', 'AWS', 'Docker', 'Figma', 'Project Management', 'Data Analysis', 'Machine Learning'];
@@ -550,29 +654,35 @@ function SkillsForm({ skills, add, remove, styles, updateStyle }) {
         </button>
         {styleOpen && (
           <div className="style-toolbar-body">
-            <div className="style-row">
-              <label className="style-label">Separator Style</label>
-              <div className="separator-toggle">
-                <button
-                  className={`sep-btn ${styles.separator === 'comma' ? 'active' : ''}`}
-                  onClick={() => updateStyle('separator', 'comma')}
-                >
-                  Comma Separated
-                </button>
-                <button
-                  className={`sep-btn ${styles.separator === 'marker' ? 'active' : ''}`}
-                  onClick={() => updateStyle('separator', 'marker')}
-                >
-                  Marker Separated
-                </button>
+            {templateFeatures.skillsSeparator !== false && (
+              <div className="style-row">
+                <label className="style-label">Separator Style</label>
+                <div className="separator-toggle">
+                  <button
+                    className={`sep-btn ${styles.separator === 'comma' ? 'active' : ''}`}
+                    onClick={() => updateStyle('separator', 'comma')}
+                  >
+                    Comma Separated
+                  </button>
+                  <button
+                    className={`sep-btn ${styles.separator === 'marker' ? 'active' : ''}`}
+                    onClick={() => updateStyle('separator', 'marker')}
+                  >
+                    Marker Separated
+                  </button>
+                </div>
               </div>
-            </div>
-            <button className="btn-reset-margins" onClick={() => updateStyle('separator', 'comma')}>
+            )}
+            <button className="btn-reset-margins" onClick={() => {
+              updateStyle('separator', defaultStyles?.separator ?? 'comma');
+              updateStyle('formatting', { bold: false, italic: false, underline: false });
+            }}>
               ↺ Reset to defaults
             </button>
           </div>
         )}
       </div>
+
       <div className="skills-input-row">
         <input
           className="field-input"
@@ -583,9 +693,35 @@ function SkillsForm({ skills, add, remove, styles, updateStyle }) {
         />
         <button className="btn-add-skill" onClick={handleAdd}>Add</button>
       </div>
+
+      {/* B/I/U near skills tags */}
+      <div className="skills-fmt-row">
+        <span className="field-label">Skill Formatting</span>
+        <div className="fmt-toggle inline">
+          {['bold', 'italic', 'underline'].map(prop => (
+            <button
+              key={prop}
+              className={`fmt-btn ${styles?.formatting?.[prop] ? 'active' : ''}`}
+              onClick={() => toggleFmt(prop)}
+              title={prop}
+            >
+              {prop === 'bold' && <b>B</b>}
+              {prop === 'italic' && <i>I</i>}
+              {prop === 'underline' && <u>U</u>}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="skill-tags">
         {skills.map(s => (
-          <span className="skill-tag" key={s}>
+          <span className="skill-tag" key={s}
+            style={{
+              fontWeight:     styles?.formatting?.bold      ? 'bold'      : undefined,
+              fontStyle:      styles?.formatting?.italic    ? 'italic'    : undefined,
+              textDecoration: styles?.formatting?.underline ? 'underline' : undefined,
+            }}
+          >
             {s} <button onClick={() => remove(s)}>✕</button>
           </span>
         ))}
@@ -601,6 +737,7 @@ function SkillsForm({ skills, add, remove, styles, updateStyle }) {
   );
 }
 
+
 // ── Page Setup ────────────────────────────────────────────
 function PageSetupForm({ settings, update, templateFeatures = {} }) {
   const MARGIN_MIN = 0.25;
@@ -613,8 +750,20 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
     update('marginLeft', 1.0);
     update('marginRight', 1.0);
     update('lineHeight', 1.6);
-    update('colorAccents', true);
+    update('colorScheme', 'teal');
   };
+
+  const SCHEMES = [
+    { id: 'teal',     color: '#2a6b6b', label: 'Teal'     },
+    { id: 'navy',     color: '#1e3a5f', label: 'Navy'     },
+    { id: 'burgundy', color: '#7a2040', label: 'Burgundy' },
+    { id: 'forest',   color: '#2d5a2d', label: 'Forest'   },
+    { id: 'slate',    color: '#455a64', label: 'Slate'    },
+    { id: 'coral',    color: '#c4522e', label: 'Coral'    },
+    { id: 'none',     color: '#1a1a1a', label: 'None'     },
+  ];
+
+  const current = settings.colorScheme ?? 'teal';
 
   return (
     <div className="form-section">
@@ -624,15 +773,20 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
         All values are in inches.
       </p>
 
-      {/* Color Accents toggle */}
-      <div className="style-row">
-        <label className="style-label">Color</label>
-        <button
-          className={`sep-btn ${(settings.colorAccents ?? true) ? 'active' : ''}`}
-          onClick={() => update('colorAccents', !(settings.colorAccents ?? true))}
-        >
-          Color Accents
-        </button>
+      {/* Color scheme picker */}
+      <div className="style-row color-scheme-row">
+        <label className="style-label">Color Scheme</label>
+        <div className="color-scheme-swatches">
+          {SCHEMES.map(s => (
+            <button
+              key={s.id}
+              className={`color-swatch ${current === s.id ? 'active' : ''}`}
+              style={{ background: s.color }}
+              onClick={() => update('colorScheme', s.id)}
+              title={s.label}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Photo position — only for templates with photoPosition: true */}

@@ -17,8 +17,10 @@ import React from 'react';
 //   4. Add an SVG thumbnail branch in TemplateSVG below
 //
 // features flags — control which UI options appear in the form:
-//   photo:         true = shows the headshot upload field in Personal
-//   photoPosition: true = shows the Left/Right toggle in Page Setup
+//   photo:           true = shows the headshot upload field in Personal
+//   photoPosition:   true = shows the Left/Right toggle in Page Setup
+//   skillsSeparator: true = shows Comma/Marker toggle in Skills style options
+//   headerAlign:     true = shows header alignment buttons in Personal style options
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const TEMPLATES = [
@@ -26,79 +28,79 @@ export const TEMPLATES = [
     id: 'classic',
     name: 'Classic',
     description: 'Clean and traditional. Timeless for any industry.',
-    features: { photo: false, photoPosition: false },
+    features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'left', showIcons: true },
       experience: { fontFamily: 'DM Sans', fontSize: 13, bulletSpacing: 3 },
       education:  { fontFamily: 'DM Sans', fontSize: 13 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.6, colorAccents: true, layout: 'standard' },
+    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.6, colorScheme: 'teal', layout: 'standard' },
   },
   {
     id: 'modern',
     name: 'Modern',
     description: 'Centered header, marker skills, teal accents. Bold and contemporary.',
-    features: { photo: false, photoPosition: false },
+    features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: true },
       experience: { fontFamily: 'DM Sans', fontSize: 13, bulletSpacing: 5 },
       education:  { fontFamily: 'DM Sans', fontSize: 13 },
       skills:     { separator: 'marker' },
     },
-    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.7, colorAccents: true, layout: 'standard' },
+    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.7, colorScheme: 'teal', layout: 'standard' },
   },
   {
     id: 'executive',
     name: 'Executive',
     description: 'Georgia serif, wide margins, centered, no color. Authoritative and refined.',
-    features: { photo: false, photoPosition: false },
+    features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: false },
       experience: { fontFamily: 'Georgia', fontSize: 13, bulletSpacing: 6 },
       education:  { fontFamily: 'Georgia', fontSize: 13 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.25, marginRight: 1.25, lineHeight: 1.8, colorAccents: false, layout: 'standard' },
+    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.25, marginRight: 1.25, lineHeight: 1.8, colorScheme: 'none', layout: 'standard' },
   },
   {
     id: 'minimal',
     name: 'Minimal',
     description: 'No icons, no color, tight margins. Let the content speak.',
-    features: { photo: false, photoPosition: false },
+    features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'left', showIcons: false },
       experience: { fontFamily: 'DM Sans', fontSize: 12, bulletSpacing: 2 },
       education:  { fontFamily: 'DM Sans', fontSize: 12 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.5, colorAccents: false, layout: 'standard' },
+    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.5, colorScheme: 'none', layout: 'standard' },
   },
   {
     id: 'sidebar',
     name: 'Sidebar',
     description: 'Two-column layout with photo, contact & skills on the left. Great for creative roles.',
-    features: { photo: true, photoPosition: false },
+    features: { photo: true, photoPosition: false, skillsSeparator: false, headerAlign: false },
     styles: {
       personal:   { headerAlign: 'left', showIcons: true },
       experience: { fontFamily: 'DM Sans', fontSize: 12, bulletSpacing: 3 },
       education:  { fontFamily: 'DM Sans', fontSize: 12 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.6, colorAccents: true, layout: 'sidebar', photoPosition: 'left' },
+    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.6, colorScheme: 'teal', layout: 'sidebar', photoPosition: 'left' },
   },
   {
     id: 'executive-photo',
     name: 'Executive Photo',
     description: 'Classic single-column with an optional circular headshot. Position left or right in Page Setup.',
-    features: { photo: true, photoPosition: true },
+    features: { photo: true, photoPosition: true, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: false },
       experience: { fontFamily: 'Georgia', fontSize: 13, bulletSpacing: 5 },
       education:  { fontFamily: 'Georgia', fontSize: 13 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.7, colorAccents: false, layout: 'executive-photo', photoPosition: 'left' },
+    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.7, colorScheme: 'none', layout: 'executive-photo', photoPosition: 'left' },
   },
 ];
 
@@ -113,14 +115,18 @@ export const TEMPLATES = [
 export function TemplateSVG({ template }) {
   const { styles, pageSettings } = template;
   const layout  = pageSettings.layout ?? 'standard';
-  const color   = pageSettings.colorAccents !== false ? '#2a6b6b' : '#888';
-  const noColor = pageSettings.colorAccents === false;
+  const scheme  = pageSettings.colorScheme ?? 'teal';
+  const color   = scheme === 'none' ? '#888' : {
+    teal: '#2a6b6b', navy: '#1e3a5f', burgundy: '#7a2040',
+    forest: '#2d5a2d', slate: '#455a64', coral: '#c4522e',
+  }[scheme] ?? '#2a6b6b';
+  const noColor = scheme === 'none';
   const W = 120, H = 160;
 
   // ── Sidebar layout thumbnail ──────────────────────────────
   if (layout === 'sidebar') {
     const sideW = 36;
-    const sideBg = color === '#2a6b6b' ? '#e8f2f2' : '#f0f0f0';
+    const sideBg = noColor ? '#f0f0f0' : color + '22';
     return (
       <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: '100%' }}>
         <rect width={W} height={H} fill="white"/>

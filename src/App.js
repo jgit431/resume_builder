@@ -89,20 +89,31 @@ const DEFAULT_RESUME = {
 
 const DEFAULT_STYLES = {
   personal: {
-    headerAlign: 'left',  // 'left' | 'center' | 'right'
+    headerAlign: 'left',
     showIcons: true,
   },
   experience: {
     fontFamily: 'DM Sans',
     fontSize: 13,
     bulletSpacing: 3,
+    formatting: {
+      role:    { bold: true,  italic: false, underline: false },
+      company: { bold: false, italic: false, underline: false },
+      date:    { bold: false, italic: false, underline: false },
+    },
   },
   education: {
     fontFamily: 'DM Sans',
     fontSize: 13,
+    formatting: {
+      school: { bold: false, italic: false, underline: false },
+      degree: { bold: false, italic: false, underline: false },
+      date:   { bold: false, italic: false, underline: false },
+    },
   },
   skills: {
     separator: 'comma',
+    formatting: { bold: false, italic: false, underline: false },
   },
 };
 
@@ -112,8 +123,8 @@ const DEFAULT_PAGE_SETTINGS = {
   marginLeft: 1.0,
   marginRight: 1.0,
   lineHeight: 1.6,
-  colorAccents: true,
-  photoPosition: 'left', // 'left' | 'right' — for Executive Photo template
+  colorScheme: 'teal', // replaces colorAccents boolean
+  photoPosition: 'left',
 };
 
 export default function App() {
@@ -122,20 +133,35 @@ export default function App() {
   const [sectionStyles, setSectionStyles] = useState(DEFAULT_STYLES);
   const [pageSettings, setPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
   const [templateFeatures, setTemplateFeatures] = useState({ photo: false, photoPosition: false });
+  const [templateDefaultStyles, setTemplateDefaultStyles] = useState(DEFAULT_STYLES);
   const [activeSection, setActiveSection] = useState('personal');
   const [uploadStatus, setUploadStatus] = useState(null);
 
   const goToBuilder = () => setView('builder');
 
   const handleStartScratch = () => {
-    setResume({ ...DEFAULT_RESUME, personal: { name: '', title: '', email: '', phone: '', location: '', linkedin: '', website: '', summary: '' }, experience: [], education: [], skills: [] });
+    setResume({ ...DEFAULT_RESUME, personal: { name: '', title: '', email: '', phone: '', location: '', linkedin: '', website: '', photo: null, summary: '' }, experience: [], education: [], skills: [] });
     setView('template-select');
   };
 
   const handleSelectTemplate = (template) => {
-    setSectionStyles(s => ({ ...s, ...template.styles }));
+    // Deep merge so formatting keys from DEFAULT_STYLES are preserved
+    setSectionStyles(s => ({
+      ...s,
+      ...template.styles,
+      experience: { ...DEFAULT_STYLES.experience, ...template.styles.experience },
+      education:  { ...DEFAULT_STYLES.education,  ...template.styles.education  },
+      skills:     { ...DEFAULT_STYLES.skills,      ...template.styles.skills     },
+    }));
     setPageSettings(template.pageSettings);
     setTemplateFeatures(template.features ?? { photo: false, photoPosition: false });
+    setTemplateDefaultStyles({
+      ...DEFAULT_STYLES,
+      ...template.styles,
+      experience: { ...DEFAULT_STYLES.experience, ...template.styles.experience },
+      education:  { ...DEFAULT_STYLES.education,  ...template.styles.education  },
+      skills:     { ...DEFAULT_STYLES.skills,      ...template.styles.skills     },
+    });
     goToBuilder();
   };
   const updateSectionStyle = (section, field, value) => {
@@ -282,6 +308,7 @@ export default function App() {
           pageSettings={pageSettings}
           updatePageSetting={updatePageSetting}
           templateFeatures={templateFeatures}
+          templateDefaultStyles={templateDefaultStyles}
         />
         <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} />
       </div>

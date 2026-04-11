@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { getScheme } from '../data/colorSchemes';
 import './PreviewPanel.css';
 
 const PAGE_W_PX = 650;
@@ -48,13 +49,30 @@ const SVG_ICONS = {
   ),
 };
 
-export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents }) {
+export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
   const align     = personalStyles.headerAlign ?? 'left';
   const showIcons = personalStyles.showIcons ?? true;
-  const accent    = colorAccents ? '#2a6b6b' : '#1a1a1a';
+  const scheme    = getScheme(colorScheme);
+  const accent    = scheme.accent;
+  const noColor   = colorScheme === 'none';
+
+  // Helper to build inline style from formatting object
+  const fmt = (f) => f ? {
+    fontWeight:     f.bold      ? 'bold'      : 'normal',
+    fontStyle:      f.italic    ? 'italic'    : 'normal',
+    textDecoration: f.underline ? 'underline' : 'none',
+  } : {};
+
+  const expFmt = sectionStyles.experience?.formatting ?? {};
+  const eduFmt = sectionStyles.education?.formatting  ?? {};
+  const skFmt  = sectionStyles.skills?.formatting     ?? {};
+
+  // Section title scales with body font size
+  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 2);
+  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 2);
 
   return (
     <div
@@ -82,7 +100,7 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 
           {personal.summary && (
             <div className="r-section">
-              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Summary</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${expTitleSize}px` }}>Summary</div>
               <p className="r-summary">{personal.summary}</p>
             </div>
           )}
@@ -92,17 +110,17 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
               fontFamily: sectionStyles.experience.fontFamily,
               fontSize:   `${sectionStyles.experience.fontSize}px`,
             }}>
-              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Experience</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${expTitleSize}px` }}>Experience</div>
               {experience.map(exp => {
                 const bullets = exp.bullets.filter(b => b.trim());
                 return (
                   <div className="r-entry" key={exp.id}>
                     <div className="r-entry-header">
                       <div>
-                        <span className="r-entry-role">{exp.role}</span>
-                        {exp.company && <span className="r-entry-company"> · {exp.company}</span>}
+                        <span className="r-entry-role" style={fmt(expFmt.role)}>{exp.role}</span>
+                        {exp.company && <span className="r-entry-company" style={fmt(expFmt.company)}> · {exp.company}</span>}
                       </div>
-                      <span className="r-entry-date">
+                      <span className="r-entry-date" style={fmt(expFmt.date)}>
                         {exp.startDate}
                         {exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}
                         {exp.current ? 'Present' : exp.endDate}
@@ -126,18 +144,18 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
               fontFamily: sectionStyles.education.fontFamily,
               fontSize:   `${sectionStyles.education.fontSize}px`,
             }}>
-              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Education</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${eduTitleSize}px` }}>Education</div>
               {education.map(edu => (
                 <div className="r-education-entry" key={edu.id}>
                   <div className="r-entry-header">
                     <div>
-                      <span className="r-entry-role">{edu.school}</span>
                       {(edu.degree || edu.field) && (
-                        <span className="r-entry-company"> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>
+                        <span className="r-entry-role" style={fmt(eduFmt.degree)}>{[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>
                       )}
+                      {edu.school && <span className="r-entry-company" style={fmt(eduFmt.school)}>{(edu.degree || edu.field) ? ' · ' : ''}{edu.school}</span>}
                       {edu.gpa && <span className="r-entry-company"> — GPA {edu.gpa}</span>}
                     </div>
-                    <span className="r-entry-date">
+                    <span className="r-entry-date" style={fmt(eduFmt.date)}>
                       {edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}
                     </span>
                   </div>
@@ -148,13 +166,13 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 
           {skills.length > 0 && (
             <div className="r-section">
-              <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Skills</div>
+              <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${eduTitleSize}px` }}>Skills</div>
               {sectionStyles.skills.separator === 'comma' ? (
-                <p className="r-skills-comma">{skills.join(', ')}</p>
+                <p className="r-skills-comma" style={fmt(skFmt)}>{skills.join(', ')}</p>
               ) : (
                 <p className="r-skills-marker">
                   {skills.map((s, i) => (
-                    <span key={s}>
+                    <span key={s} style={fmt(skFmt)}>
                       {i > 0 && <span className="r-skill-dot" style={{ color: accent }}>▪</span>}
                       {s}
                     </span>
@@ -172,16 +190,31 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 // ─────────────────────────────────────────────────────────
 // Sidebar layout — two-column with photo, contact & skills on left
 // ─────────────────────────────────────────────────────────
-export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, colorAccents }) {
+export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, colorScheme, personalStyles }) {
   const { personal, experience, education, skills } = resume;
-  const accent   = colorAccents ? '#2a6b6b' : '#1a1a1a';
-  const sidebarW = '32%';
-  const sidebarBg = colorAccents ? '#f0f6f6' : '#f5f5f5';
-  const sidebarBorder = colorAccents ? '#c8e0e0' : '#ddd';
+  const scheme        = getScheme(colorScheme);
+  const accent        = scheme.accent;
+  const sidebarBg     = scheme.sidebarBg;
+  const sidebarBorder = scheme.sidebarBorder;
+  const sidebarW      = '32%';
+  const showIcons     = personalStyles?.showIcons ?? true;
 
-  const sectionTitle = (title) => (
-    <div style={{
-      fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+  const expFmt = sectionStyles.experience?.formatting ?? {};
+  const eduFmt = sectionStyles.education?.formatting  ?? {};
+  const skFmt  = sectionStyles.skills?.formatting     ?? {};
+
+  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 2);
+  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 2);
+
+  const fmt = (f) => f ? {
+    fontWeight:     f.bold      ? 'bold'      : 'normal',
+    fontStyle:      f.italic    ? 'italic'    : 'normal',
+    textDecoration: f.underline ? 'underline' : 'none',
+  } : {};
+
+  const sectionTitle = (title, size) => (
+    <div className="r-section-title" style={{
+      fontSize: size ?? 10, fontWeight: 700, letterSpacing: '0.1em',
       textTransform: 'uppercase', color: accent,
       borderBottom: `1.5px solid ${accent}`,
       paddingBottom: 3, marginBottom: 8, marginTop: 14,
@@ -192,19 +225,16 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
     <div style={{ display: 'flex', paddingLeft: mLeft, paddingRight: mRight, lineHeight, minHeight: '100%' }}>
       {/* ── Left sidebar ── */}
       <div style={{ width: sidebarW, flexShrink: 0, background: sidebarBg, borderRight: `1px solid ${sidebarBorder}`, padding: '20px 16px 20px 0', boxSizing: 'border-box' }}>
-        {/* Photo */}
         {personal.photo && (
           <div style={{ textAlign: 'center', marginBottom: 14 }}>
             <img src={personal.photo} alt="Headshot" style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${accent}` }} />
           </div>
         )}
-        {/* Name & title in sidebar for cleaner look */}
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
           {personal.name  && <div style={{ fontWeight: 700, fontSize: 15, color: '#1a1a1a', lineHeight: 1.2 }}>{personal.name}</div>}
           {personal.title && <div style={{ fontSize: 11, color: '#666', marginTop: 3 }}>{personal.title}</div>}
         </div>
 
-        {/* Contact */}
         {(personal.email || personal.phone || personal.location || personal.linkedin || personal.website) && (
           <>
             {sectionTitle('Contact')}
@@ -216,20 +246,28 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
               personal.website  && { icon: SVG_ICONS.website(accent),  text: personal.website.replace(/^https?:\/\/(www\.)?/, '') },
             ].filter(Boolean).map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 10.5, color: '#333', marginBottom: 5, wordBreak: 'break-all' }}>
-                <span style={{ flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+                {showIcons && <span style={{ flexShrink: 0, marginTop: 1 }}>{item.icon}</span>}
                 <span>{item.text}</span>
               </div>
             ))}
           </>
         )}
 
-        {/* Skills */}
         {skills.length > 0 && (
           <>
             {sectionTitle('Skills')}
-            {skills.map((s, i) => (
-              <div key={i} style={{ fontSize: 10.5, color: '#333', padding: '3px 0', borderBottom: '1px solid #e8e8e8' }}>{s}</div>
-            ))}
+            {sectionStyles.skills?.separator === 'marker' ? (
+              skills.map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10.5, color: '#333', padding: '3px 0', borderBottom: '1px solid #e8e8e8' }}>
+                  <span style={{ color: accent, fontSize: 8 }}>▪</span>
+                  <span style={fmt(skFmt)}>{s}</span>
+                </div>
+              ))
+            ) : (
+              skills.map((s, i) => (
+                <div key={i} style={{ fontSize: 10.5, color: '#333', padding: '3px 0', borderBottom: '1px solid #e8e8e8', ...fmt(skFmt) }}>{s}</div>
+              ))
+            )}
           </>
         )}
       </div>
@@ -238,29 +276,29 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
       <div style={{ flex: 1, paddingLeft: 18, paddingTop: 20, paddingBottom: 20, boxSizing: 'border-box' }}>
         {personal.summary && (
           <>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8 }}>Summary</div>
+            {sectionTitle('Summary', expTitleSize)}
             <p style={{ fontSize: 11.5, color: '#333', marginBottom: 12, lineHeight: 1.6 }}>{personal.summary}</p>
           </>
         )}
 
         {experience.length > 0 && (
           <>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8 }}>Experience</div>
+            {sectionTitle('Experience', expTitleSize)}
             {experience.map(exp => {
               const bullets = exp.bullets.filter(b => b.trim());
               return (
                 <div key={exp.id} style={{ marginBottom: 12, fontFamily: sectionStyles.experience.fontFamily, fontSize: `${sectionStyles.experience.fontSize}px` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div className="r-entry-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <span style={{ fontWeight: 700 }}>{exp.role}</span>
-                      {exp.company && <span style={{ color: '#555' }}> · {exp.company}</span>}
+                      <span style={fmt(expFmt.role)}>{exp.role}</span>
+                      {exp.company && <span style={{ color: '#555', ...fmt(expFmt.company) }}> · {exp.company}</span>}
                     </div>
-                    <span style={{ fontSize: 10.5, color: '#888', flexShrink: 0, marginLeft: 8 }}>
+                    <span style={{ fontSize: 10.5, color: '#888', flexShrink: 0, marginLeft: 8, ...fmt(expFmt.date) }}>
                       {exp.startDate}{exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}{exp.current ? 'Present' : exp.endDate}
                     </span>
                   </div>
                   {bullets.length > 0 && (
-                    <ul style={{ margin: '4px 0 0 14px', padding: 0 }}>
+                    <ul className="r-bullets" style={{ margin: '4px 0 0 14px', padding: 0 }}>
                       {bullets.map((b, i) => (
                         <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px`, fontSize: `${sectionStyles.experience.fontSize}px` }}>{b}</li>
                       ))}
@@ -274,15 +312,16 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
 
         {education.length > 0 && (
           <>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, borderBottom: `1.5px solid ${accent}`, paddingBottom: 3, marginBottom: 8, marginTop: 12 }}>Education</div>
+            {sectionTitle('Education', eduTitleSize)}
             {education.map(edu => (
               <div key={edu.id} style={{ marginBottom: 8, fontFamily: sectionStyles.education.fontFamily, fontSize: `${sectionStyles.education.fontSize}px` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="r-entry-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <div>
-                    <span style={{ fontWeight: 700 }}>{edu.school}</span>
-                    {(edu.degree || edu.field) && <span style={{ color: '#555' }}> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
+                    {(edu.degree || edu.field) && <span style={fmt(eduFmt.degree)}>{[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
+                    {edu.school && <span style={{ color: '#555', ...fmt(eduFmt.school) }}>{(edu.degree || edu.field) ? ' · ' : ''}{edu.school}</span>}
+                    {edu.gpa && <span style={{ color: '#888' }}> — GPA {edu.gpa}</span>}
                   </div>
-                  <span style={{ fontSize: 10.5, color: '#888' }}>{edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}</span>
+                  <span style={{ fontSize: 10.5, color: '#888', ...fmt(eduFmt.date) }}>{edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}</span>
                 </div>
               </div>
             ))}
@@ -296,13 +335,28 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
 // ─────────────────────────────────────────────────────────
 // Executive Photo layout — classic single-column with optional circular headshot
 // ─────────────────────────────────────────────────────────
-export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents, photoPosition }) {
+export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme, photoPosition }) {
   const { personal, experience, education, skills } = resume;
-  const accent     = colorAccents ? '#2a6b6b' : '#1a1a1a';
-  const align      = personalStyles.headerAlign ?? 'center';
-  const showIcons  = personalStyles.showIcons ?? true;
-  const photoSide  = photoPosition ?? 'left';
+  const scheme    = getScheme(colorScheme);
+  const accent    = scheme.accent;
+  const noColor   = colorScheme === 'none';
+  const align     = personalStyles.headerAlign ?? 'center';
+  const showIcons = personalStyles.showIcons ?? true;
+  const photoSide = photoPosition ?? 'left';
   const PHOTO_SIZE = 72;
+
+  const expFmt = sectionStyles.experience?.formatting ?? {};
+  const eduFmt = sectionStyles.education?.formatting  ?? {};
+  const skFmt  = sectionStyles.skills?.formatting     ?? {};
+
+  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 2);
+  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 2);
+
+  const fmt = (f) => f ? {
+    fontWeight:     f.bold      ? 'bold'      : 'normal',
+    fontStyle:      f.italic    ? 'italic'    : 'normal',
+    textDecoration: f.underline ? 'underline' : 'none',
+  } : {};
 
   return (
     <div className="resume-body" style={{ paddingLeft: mLeft, paddingRight: mRight, lineHeight }}>
@@ -328,20 +382,20 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
       {/* Rest is identical to ResumeBody */}
       {personal.summary && (
         <div className="r-section">
-          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Summary</div>
+          <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${expTitleSize}px` }}>Summary</div>
           <p className="r-summary">{personal.summary}</p>
         </div>
       )}
       {experience.length > 0 && (
         <div className="r-section" style={{ fontFamily: sectionStyles.experience.fontFamily, fontSize: `${sectionStyles.experience.fontSize}px` }}>
-          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Experience</div>
+          <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${expTitleSize}px` }}>Experience</div>
           {experience.map(exp => {
             const bullets = exp.bullets.filter(b => b.trim());
             return (
               <div className="r-entry" key={exp.id}>
                 <div className="r-entry-header">
-                  <div><span className="r-entry-role">{exp.role}</span>{exp.company && <span className="r-entry-company"> · {exp.company}</span>}</div>
-                  <span className="r-entry-date">{exp.startDate}{exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}{exp.current ? 'Present' : exp.endDate}</span>
+                  <div><span className="r-entry-role" style={fmt(expFmt.role)}>{exp.role}</span>{exp.company && <span className="r-entry-company" style={fmt(expFmt.company)}> · {exp.company}</span>}</div>
+                  <span className="r-entry-date" style={fmt(expFmt.date)}>{exp.startDate}{exp.startDate && (exp.endDate || exp.current) ? ' – ' : ''}{exp.current ? 'Present' : exp.endDate}</span>
                 </div>
                 {bullets.length > 0 && (
                   <ul className="r-bullets">{bullets.map((b, i) => <li key={i} style={{ marginBottom: `${sectionStyles.experience.bulletSpacing}px` }}>{b}</li>)}</ul>
@@ -353,16 +407,16 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
       )}
       {education.length > 0 && (
         <div className="r-section" style={{ fontFamily: sectionStyles.education.fontFamily, fontSize: `${sectionStyles.education.fontSize}px` }}>
-          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Education</div>
+          <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${eduTitleSize}px` }}>Education</div>
           {education.map(edu => (
             <div className="r-education-entry" key={edu.id}>
               <div className="r-entry-header">
                 <div>
-                  <span className="r-entry-role">{edu.school}</span>
-                  {(edu.degree || edu.field) && <span className="r-entry-company"> · {[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
+                  {(edu.degree || edu.field) && <span className="r-entry-role" style={fmt(eduFmt.degree)}>{[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
+                  {edu.school && <span className="r-entry-company" style={fmt(eduFmt.school)}>{(edu.degree || edu.field) ? ' · ' : ''}{edu.school}</span>}
                   {edu.gpa && <span className="r-entry-company"> — GPA {edu.gpa}</span>}
                 </div>
-                <span className="r-entry-date">{edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}</span>
+                <span className="r-entry-date" style={fmt(eduFmt.date)}>{edu.startDate}{edu.startDate && edu.endDate ? ' – ' : ''}{edu.endDate}</span>
               </div>
             </div>
           ))}
@@ -370,13 +424,13 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
       )}
       {skills.length > 0 && (
         <div className="r-section">
-          <div className="r-section-title" style={{ color: accent, borderColor: colorAccents ? '#ddd' : '#1a1a1a' }}>Skills</div>
+          <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${eduTitleSize}px` }}>Skills</div>
           {sectionStyles.skills.separator === 'comma' ? (
-            <p className="r-skills-comma">{skills.join(', ')}</p>
+            <p className="r-skills-comma" style={fmt(skFmt)}>{skills.join(', ')}</p>
           ) : (
             <p className="r-skills-marker">
               {skills.map((s, i) => (
-                <span key={s}>{i > 0 && <span className="r-skill-dot" style={{ color: accent }}>▪</span>}{s}</span>
+                <span key={s} style={fmt(skFmt)}>{i > 0 && <span className="r-skill-dot" style={{ color: accent }}>▪</span>}{s}</span>
               ))}
             </p>
           )}
@@ -445,12 +499,12 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings }) {
   }));
 
   const lineHeight     = pageSettings.lineHeight ?? 1.6;
-  const colorAccents   = pageSettings.colorAccents ?? true;
+  const colorScheme    = pageSettings.colorScheme ?? 'teal';
   const personalStyles = sectionStyles.personal ?? { headerAlign: 'left', showIcons: true };
   const photoPosition  = pageSettings.photoPosition ?? 'left';
   const layoutType     = pageSettings.layout ?? 'standard';
 
-  const bodyProps = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorAccents };
+  const bodyProps = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme };
 
   const BodyComponent = layoutType === 'sidebar'         ? SidebarBody
                       : layoutType === 'executive-photo' ? ExecutivePhotoBody
