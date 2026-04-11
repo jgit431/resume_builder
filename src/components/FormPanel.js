@@ -21,6 +21,7 @@ export default function FormPanel({
   pageSettings, updatePageSetting,
   templateFeatures = { photo: false, photoPosition: false },
   templateDefaultStyles,
+  templateDefaultPageSettings,
 }) {
   return (
     <div className="form-panel">
@@ -82,7 +83,7 @@ export default function FormPanel({
           />
         )}
         {activeSection === 'page' && (
-          <PageSetupForm settings={pageSettings} update={updatePageSetting} templateFeatures={templateFeatures} />
+          <PageSetupForm settings={pageSettings} update={updatePageSetting} templateFeatures={templateFeatures} defaultPageSettings={templateDefaultPageSettings} />
         )}
       </div>
     </div>
@@ -831,19 +832,22 @@ function SkillsForm({ skills, add, remove, styles, updateStyle, defaultStyles, t
 
 
 // ── Page Setup ────────────────────────────────────────────
-function PageSetupForm({ settings, update, templateFeatures = {} }) {
+function PageSetupForm({ settings, update, templateFeatures = {}, defaultPageSettings }) {
   const MARGIN_MIN = 0.25;
   const MARGIN_MAX = 2.0;
   const MARGIN_STEP = 0.25;
 
+  // Fall back to current settings if no defaults provided — reset is still meaningful
+  const d = defaultPageSettings ?? settings;
+
   const reset = () => {
-    update('marginTop', 1.0);
-    update('marginBottom', 1.0);
-    update('marginLeft', 1.0);
-    update('marginRight', 1.0);
-    update('lineHeight', 1.6);
-    update('colorScheme', 'teal');
-    update('bodyFont', 'DM Sans');
+    update('marginTop',    d.marginTop    ?? 1.0);
+    update('marginBottom', d.marginBottom ?? 1.0);
+    update('marginLeft',   d.marginLeft   ?? 1.0);
+    update('marginRight',  d.marginRight  ?? 1.0);
+    update('lineHeight',   d.lineHeight   ?? 1.6);
+    update('colorScheme',  d.colorScheme  ?? 'teal');
+    update('bodyFont',     d.bodyFont     ?? 'DM Sans');
   };
 
   const SCHEMES = [
@@ -1008,7 +1012,7 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
       </div>
 
       <button className="btn-reset-margins" onClick={reset}>
-        ↺ Reset to defaults (1" all sides)
+        ↺ Reset to template defaults
       </button>
 
       <div className="page-info-box">

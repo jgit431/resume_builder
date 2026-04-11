@@ -56,18 +56,25 @@ function EditableValue({ value, min, max, step, unit, decimals, onChange }) {
 // ─────────────────────────────────────────────────────────
 // CLPageSetupForm — mirrors the resume's PageSetupForm
 // ─────────────────────────────────────────────────────────
-function CLPageSetupForm({ settings, onUpdate }) {
+function CLPageSetupForm({ settings, onUpdate, defaultSettings }) {
   const MARGIN_MIN  = 0.25;
   const MARGIN_MAX  = 2.0;
   const MARGIN_STEP = 0.25;
 
+  const d = defaultSettings ?? settings;
+
   const reset = () => {
-    onUpdate('marginTop',    1.0);
-    onUpdate('marginBottom', 1.0);
-    onUpdate('marginLeft',   1.0);
-    onUpdate('marginRight',  1.0);
-    onUpdate('lineHeight',   1.6);
-    onUpdate('bodyFont',    'DM Sans');
+    // Apply all fields in one call to avoid stale closure overwriting
+    const resetPS = {
+      ...settings,
+      marginTop:    d.marginTop    ?? 1.0,
+      marginBottom: d.marginBottom ?? 1.0,
+      marginLeft:   d.marginLeft   ?? 1.0,
+      marginRight:  d.marginRight  ?? 1.0,
+      lineHeight:   d.lineHeight   ?? 1.6,
+      bodyFont:     d.bodyFont     ?? 'DM Sans',
+    };
+    onUpdate('__reset__', resetPS);
   };
 
   return (
@@ -162,7 +169,7 @@ function CLPageSetupForm({ settings, onUpdate }) {
           </div>
 
           <button className="btn-reset-margins" onClick={reset}>
-            ↺ Reset to defaults (1" all sides)
+            ↺ Reset to template defaults
           </button>
 
           <div className="page-info-box">
@@ -506,6 +513,7 @@ export default function CoverLetterBuilder({
   resumeData,
   templateStyles,
   pageSettings,
+  templateDefaultPageSettings,
   templateName,
   onBack,
   onChange,
@@ -706,7 +714,14 @@ export default function CoverLetterBuilder({
             <div className="form-content animate-in">
               <CLPageSetupForm
                 settings={pageSettings}
-                onUpdate={(field, val) => onChange({ ...coverLetter, pageSettings: { ...pageSettings, [field]: val } })}
+                onUpdate={(field, val) => {
+                  if (field === '__reset__') {
+                    onChange({ ...coverLetter, pageSettings: val });
+                  } else {
+                    onChange({ ...coverLetter, pageSettings: { ...pageSettings, [field]: val } });
+                  }
+                }}
+                defaultSettings={templateDefaultPageSettings}
               />
             </div>
           )}

@@ -256,7 +256,7 @@ export default function Dashboard({
               )}
             </div>
 
-            {/* Full Application */}
+            {/* Resume + Cover Letter */}
             <div className={`dash-new-card ${atFullLimit ? 'at-limit' : ''}`}>
               <span className="dash-new-icon full-icon">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -266,7 +266,7 @@ export default function Dashboard({
                   <line x1="10" y1="14" x2="14" y2="14"/>
                 </svg>
               </span>
-              <span className="dash-new-title">Full Application</span>
+              <span className="dash-new-title">Resume + Cover Letter</span>
               <span className="dash-new-desc">
                 {atFullLimit
                   ? 'You\'ve reached a project limit.'

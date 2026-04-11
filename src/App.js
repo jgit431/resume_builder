@@ -94,6 +94,7 @@ export default function App() {
   const [pageSettings,         setPageSettings]         = useState(DEFAULT_PAGE_SETTINGS);
   const [templateFeatures,     setTemplateFeatures]     = useState({ photo: false, photoPosition: false });
   const [templateDefaultStyles,setTemplateDefaultStyles]= useState(DEFAULT_STYLES);
+  const [templateDefaultPageSettings, setTemplateDefaultPageSettings] = useState(DEFAULT_PAGE_SETTINGS);
   const [activeSection,        setActiveSection]        = useState('personal');
   const [uploadStatus,         setUploadStatus]         = useState(null);
   const [currentTemplateName,  setCurrentTemplateName]  = useState('Classic');
@@ -144,6 +145,7 @@ export default function App() {
     setPageSettings(template.pageSettings);
     setTemplateFeatures(template.features ?? { photo: false, photoPosition: false });
     setTemplateDefaultStyles({ ...DEFAULT_STYLES, ...merged });
+    setTemplateDefaultPageSettings(template.pageSettings);
     setCurrentTemplateName(template.name);
     setCurrentTemplateId(template.id);
   }, []);
@@ -159,6 +161,7 @@ export default function App() {
       if (tmpl) {
         setTemplateFeatures(tmpl.features ?? { photo: false, photoPosition: false });
         setTemplateDefaultStyles(buildStylesFromTemplate(tmpl));
+        setTemplateDefaultPageSettings(tmpl.pageSettings);
       }
     } else {
       setResume(EMPTY_RESUME);
@@ -490,8 +493,6 @@ export default function App() {
         project={activeProject}
         onBackToProjects={() => setView('dashboard')}
         onEditResume={handleEditResume}
-        onChangeResumeTemplate={() => { setCompareMode(false); setView('template-select'); }}
-        onCompareResumeTemplate={handleOpenCompare}
         onUpdateName={handleUpdateProjectName}
         onDeleteResume={handleDeleteResume}
         onAddCoverLetter={handleNewCoverLetter}
@@ -542,6 +543,7 @@ export default function App() {
         resumeData={resumeData}
         templateStyles={clTemplate.styles}
         pageSettings={clPageSettings}
+        templateDefaultPageSettings={clTemplate.pageSettings}
         templateName={clTemplate.name}
         onBack={() => setView('project-home')}
         onChange={handleUpdateCoverLetter}
@@ -589,6 +591,7 @@ export default function App() {
           updatePageSetting={updatePageSetting}
           templateFeatures={templateFeatures}
           templateDefaultStyles={templateDefaultStyles}
+          templateDefaultPageSettings={templateDefaultPageSettings}
         />
         <PreviewPanel
           resume={resume}

@@ -96,11 +96,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s;
-}
-
-.proj-doc-card:hover {
-  border-color: var(--teal);
 }
 
 .proj-doc-card-header {
@@ -141,15 +136,37 @@
   overflow: hidden;
 }
 
-.proj-doc-thumbnail svg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.proj-doc-thumbnail-clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.proj-doc-thumbnail-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(42, 107, 107, 0.0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  border-radius: 4px;
+}
+
+.proj-doc-thumbnail-clickable:hover .proj-doc-thumbnail-overlay {
+  opacity: 1;
+  background: rgba(42, 107, 107, 0.75);
 }
 
 /* ── Resume info ── */
 .proj-doc-info {
-  padding: 14px 20px 0;
+  padding: 14px 20px 14px;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -168,57 +185,24 @@
   letter-spacing: 0.05em;
 }
 
+/* Counts row — delete button sits on the right of the same row */
 .proj-doc-counts {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-top: 4px;
   font-size: 11px;
   color: var(--ink-faint);
 }
 
-/* ── Doc card actions ── */
-.proj-doc-actions {
+.proj-doc-counts-text {
   display: flex;
-  gap: 8px;
-  padding: 16px 20px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.btn-proj-edit,
-.btn-proj-change-template,
-.btn-proj-compare {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 13px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-body);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-proj-edit {
-  background: var(--ink);
-  color: white;
-  border: none;
-}
-.btn-proj-edit:hover { background: var(--teal); }
-
-.btn-proj-change-template {
-  background: transparent;
-  color: var(--ink);
-  border: 1.5px solid var(--ink);
-}
-.btn-proj-change-template:hover { background: var(--ink); color: white; }
-
-.btn-proj-compare {
-  background: transparent;
-  color: var(--teal);
-  border: 1.5px solid var(--teal);
-}
-.btn-proj-compare:hover { background: var(--teal); color: white; }
+/* proj-doc-actions hidden — delete lives inside proj-doc-counts now */
+.proj-doc-actions { display: none; }
 
 /* ── Empty state ── */
 .proj-doc-empty-state {
@@ -267,13 +251,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s;
 }
-
-.proj-cl-item:hover { background: var(--cream); }
 
 .proj-cl-item-info {
   flex: 1;
@@ -319,25 +299,41 @@
   border-radius: 20px;
 }
 
-.btn-proj-cl-edit {
-  background: none;
-  border: none;
+.proj-cl-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Pencil edit button */
+.btn-proj-cl-edit-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  background: transparent;
+  border: 1.5px solid var(--teal);
+  border-radius: 6px;
   color: var(--teal);
   font-size: 12px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
-  white-space: nowrap;
-  padding: 4px 0;
+  transition: all 0.2s;
   flex-shrink: 0;
+  white-space: nowrap;
 }
+.btn-proj-cl-edit-icon:hover { background: var(--teal); color: white; }
 
 .proj-cl-item-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
+
 
 .btn-proj-cl-delete {
   display: flex;
