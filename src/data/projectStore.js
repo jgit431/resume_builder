@@ -77,12 +77,15 @@ export function makeResumeSlot({ templateId = 'classic', templateName = 'Classic
 // Stored inside project.coverLetters[].
 export function makeCoverLetterSlot({ templateId = 'classic', templateName = 'Classic', linkedToResume = true } = {}) {
   return {
-    id:            generateId(),
+    id:                generateId(),
     templateId,
     templateName,
     linkedToResume,
-    targetCompany: '',
-    targetRole:    '',
+    targetCompany:     '',
+    targetRole:        '',
+    hiringManagerName: '',  // if set, used in salutation
+    customDate:        null, // null = today's date; string = user-specified date
+    showDate:          true, // false = date hidden entirely
     sections: {
       opening: '',
       body1:   '',
@@ -91,7 +94,6 @@ export function makeCoverLetterSlot({ templateId = 'classic', templateName = 'Cl
     },
     sectionStyles: null,
     pageSettings:  null,
-    // Only populated when not linked to a resume:
     standaloneInfo: linkedToResume ? null : {
       name: '', title: '', skills: [], experience: [], education: [],
     },

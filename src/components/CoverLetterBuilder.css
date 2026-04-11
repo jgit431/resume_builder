@@ -68,13 +68,6 @@
   gap: 4px;
 }
 
-.cl-target-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--ink-faint);
-}
 
 .cl-target-input {
   width: 100%;
@@ -170,6 +163,12 @@
   color: var(--ink-light);
 }
 
+.cl-section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .btn-cl-regenerate {
   display: flex;
   align-items: center;
@@ -188,6 +187,68 @@
 
 .btn-cl-regenerate:hover:not(:disabled) { opacity: 0.85; }
 .btn-cl-regenerate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── X remove buttons — matches FormPanel .btn-icon ── */
+.btn-cl-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-cl-icon:hover { background: #fee; color: #c00; }
+
+/* ── Restore deleted section ── */
+.btn-cl-restore-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: transparent;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-cl-restore-section:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ── Field label with inline restore ── */
+.cl-target-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-cl-field-restore {
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
 
 .cl-section-textarea {
   width: 100%;
