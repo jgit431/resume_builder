@@ -1,0 +1,427 @@
+.proj-home {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--cream);
+}
+
+/* ── Main ── */
+.proj-home-main {
+  flex: 1;
+  padding: 32px 64px 80px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Back button ── */
+.proj-home-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid var(--border);
+  color: var(--ink-light);
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.2s;
+}
+
+.proj-home-back:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── Project name ── */
+.proj-home-name {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--ink);
+  cursor: text;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.1;
+  user-select: none;
+}
+
+.proj-home-name:hover .proj-home-name-pencil {
+  opacity: 1;
+}
+
+.proj-home-name-pencil {
+  opacity: 0;
+  color: var(--ink-faint);
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.proj-home-name-input {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 400;
+  color: var(--ink);
+  border: none;
+  border-bottom: 2px solid var(--teal);
+  background: transparent;
+  outline: none;
+  padding: 0;
+  width: 100%;
+  line-height: 1.1;
+}
+
+/* ── Documents grid ── */
+.proj-home-docs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Doc card shared ── */
+.proj-doc-card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s;
+}
+
+.proj-doc-card:hover {
+  border-color: var(--teal);
+}
+
+.proj-doc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.proj-doc-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.proj-doc-template-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--teal-light);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.proj-doc-cl-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+/* ── Template thumbnail ── */
+.proj-doc-thumbnail {
+  padding: 16px 20px 0;
+  height: 180px;
+  overflow: hidden;
+}
+
+.proj-doc-thumbnail svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Resume info ── */
+.proj-doc-info {
+  padding: 14px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.proj-doc-person-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.proj-doc-person-title {
+  font-size: 12px;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proj-doc-counts {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* ── Doc card actions ── */
+.proj-doc-actions {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+
+.btn-proj-edit,
+.btn-proj-change-template,
+.btn-proj-compare {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-proj-edit {
+  background: var(--ink);
+  color: white;
+  border: none;
+}
+.btn-proj-edit:hover { background: var(--teal); }
+
+.btn-proj-change-template {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+.btn-proj-change-template:hover { background: var(--ink); color: white; }
+
+.btn-proj-compare {
+  background: transparent;
+  color: var(--teal);
+  border: 1.5px solid var(--teal);
+}
+.btn-proj-compare:hover { background: var(--teal); color: white; }
+
+/* ── Empty state ── */
+.proj-doc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+
+.proj-doc-tip {
+  font-size: 12px;
+  color: var(--ink-faint);
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+.btn-proj-doc-create {
+  background: var(--teal);
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-proj-doc-create:hover { opacity: 0.85; }
+
+/* ── Cover letter list ── */
+.proj-cl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px 16px;
+}
+
+.proj-cl-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.proj-cl-item:hover { background: var(--cream); }
+
+.proj-cl-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.proj-cl-company {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proj-cl-role {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-top: 1px;
+}
+
+.proj-cl-item-badges {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.proj-cl-linked-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--teal-light);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.proj-cl-template-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  background: var(--cream-dark);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.btn-proj-cl-edit {
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+
+.btn-proj-cl-add {
+  background: transparent;
+  border: 1.5px dashed var(--border);
+  color: var(--ink-light);
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+
+.btn-proj-cl-add:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── Resume delete button ── */
+.btn-proj-delete-resume {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid #e05252;
+  border-radius: 8px;
+  color: #e05252;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-proj-delete-resume:hover {
+  background: #e05252;
+  color: #fff;
+}
+
+.proj-doc-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-light);
+  white-space: nowrap;
+}
+
+.btn-proj-confirm-yes {
+  background: #e05252;
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.btn-proj-confirm-no {
+  background: transparent;
+  color: var(--ink-light);
+  border: 1.5px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* ── Coming soon message ── */
+.proj-cl-coming-soon {
+  font-size: 12px;
+  color: var(--teal);
+  font-weight: 600;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .proj-home-main { padding: 24px 32px 60px; }
+  .proj-home-docs { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .proj-home-main { padding: 20px 20px 48px; }
+  .proj-home-name { font-size: 28px; }
+}

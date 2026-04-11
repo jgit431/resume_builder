@@ -17,6 +17,34 @@
   flex-shrink: 0;
 }
 
+.preview-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-back-to-project {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  color: var(--ink-light);
+  border: 1.5px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-back-to-project:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
 .preview-label {
   font-size: 11px;
   font-weight: 700;
@@ -291,7 +319,7 @@
   gap: 7px;
   background: transparent;
   color: var(--ink);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--border);
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 13px;
@@ -301,8 +329,8 @@
 }
 
 .btn-change-template:hover {
-  background: var(--ink);
-  color: var(--white);
+  border-color: var(--teal);
+  color: var(--teal);
   transform: translateY(-1px);
 }
 

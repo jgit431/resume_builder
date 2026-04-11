@@ -464,7 +464,7 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
 // ─────────────────────────────────────────────────────────
 // Main panel
 // ─────────────────────────────────────────────────────────
-export default function PreviewPanel({ resume, sectionStyles, pageSettings, onChangeTemplate, onCompareTemplate }) {
+export default function PreviewPanel({ resume, sectionStyles, pageSettings, onChangeTemplate, onCompareTemplate, onBackToProject }) {
   const measureRef = useRef();
   const [layout, setLayout] = useState({ bodyHeight: PAGE_H_PX, cutPoints: [] });
 
@@ -597,10 +597,18 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings, onCh
     <div className="preview-panel">
       {/* ── Toolbar ── */}
       <div className="preview-toolbar">
-        <span className="preview-label">
-          Live Preview
-          {numPages > 1 && <span className="preview-page-count"> · {numPages} pages</span>}
-        </span>
+        <div className="preview-toolbar-left">
+          <button className="btn-back-to-project" onClick={onBackToProject}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            My Project
+          </button>
+          <span className="preview-label">
+            Live Preview
+            {numPages > 1 && <span className="preview-page-count"> · {numPages} pages</span>}
+          </span>
+        </div>
         <div className="preview-toolbar-actions">
           <button className="btn-compare-template" onClick={onCompareTemplate} disabled={!hasContent} title="Compare templates side by side">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
