@@ -1,0 +1,31 @@
+/* ── Matched template card ── */
+.cl-template-match {
+  border-color: var(--teal) !important;
+  border-width: 4px !important;
+  box-shadow: 0 0 0 5px rgba(42, 107, 107, 0.2), var(--shadow-lg) !important;
+}
+
+/* ── Match badge overlaid on the thumbnail ── */
+.template-preview-clip {
+  position: relative;
+}
+
+.cl-match-badge {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--teal);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(42, 107, 107, 0.35);
+  pointer-events: none;
+}

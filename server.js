@@ -69,7 +69,6 @@ app.post('/api/suggest-bullets', async (req, res) => {
     const filled = (existingBullets ?? []).map((b, i) => ({ text: b.trim(), index: i })).filter(b => b.text);
 
     if (filled.length === 0) {
-      // No existing bullets — generate 3 new ones
       const systemPrompt = `You are an expert resume writer. Generate exactly 3 strong, achievement-oriented bullet points for a resume job entry.
 Each bullet should follow the pattern: accomplished X by doing Y, resulting in Z (quantify where possible).
 Return exactly 3 bullet points, one per line, with no bullet symbols, numbers, or extra formatting.`;
@@ -81,7 +80,6 @@ Return exactly 3 bullet points, one per line, with no bullet symbols, numbers, o
       return res.json({ bullets });
     }
 
-    // Improve all bullets in one prompt, preserving their numbering
     const systemPrompt = `You are an expert resume writer. Improve each of the numbered resume bullet points below for the given role.
 For each bullet, return an improved version following this pattern: accomplished X by doing Y, resulting in Z (quantify where possible).
 Return ONLY the improved bullets, numbered exactly the same way (e.g. "1. improved text"), one per line, no extra commentary.`;
@@ -95,7 +93,6 @@ ${bulletList}`;
 
     const text = await callGroq(systemPrompt, userPrompt);
 
-    // Parse "1. text" lines and map back to original indices
     const bullets = text.split('\n')
       .map(l => {
         const match = l.match(/^(\d+)\.\s+(.+)/);
@@ -168,10 +165,9 @@ Rules:
 - id fields should be sequential integers starting at 1
 - Return ONLY the JSON object, nothing else`;
 
-    const text_truncated = text.slice(0, 6000); // stay within token limits
+    const text_truncated = text.slice(0, 6000);
     const raw = await callGroq(systemPrompt, `Parse this resume:\n\n${text_truncated}`);
 
-    // Strip any accidental markdown fences
     const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
     const parsed = JSON.parse(clean);
 
@@ -182,6 +178,112 @@ Rules:
   }
 });
 
+// ── POST /api/generate-cover-letter-section ───────────────
+app.post('/api/generate-cover-letter-section', async (req, res) => {
+  try {
+    const { section, targetCompany, targetRole, existingText, resumeInfo } = req.body;
+    if (!section) return res.status(400).json({ error: 'section required' });
+
+    const name       = resumeInfo?.name       || 'the applicant';
+    const title      = resumeInfo?.title      || '';
+    const skills     = (resumeInfo?.skills    || []).slice(0, 10).join(', ');
+    const experience = (resumeInfo?.experience || [])
+      .filter(e => e.role || e.company)
+      .map(e => `${e.role} at ${e.company}`)
+      .join('; ');
+    const education  = (resumeInfo?.education || [])
+      .map(e => [e.degree, e.field, e.school].filter(Boolean).join(' in '))
+      .join('; ');
+    const summary    = resumeInfo?.summary || '';
+
+    const context = `Applicant: ${name}${title ? `, ${title}` : ''}
+Target Role: ${targetRole || 'not specified'}
+Target Company: ${targetCompany || 'not specified'}
+Experience: ${experience || 'not provided'}
+Education: ${education || 'not provided'}
+Skills: ${skills || 'not provided'}
+${summary ? `Summary: ${summary}` : ''}`.trim();
+
+    const hasExisting = existingText && existingText.trim().length > 0;
+
+    const sectionInstructions = {
+      opening: hasExisting
+        ? `Rewrite and improve this opening paragraph for a cover letter. Keep it strong, specific, and engaging. Express genuine enthusiasm for the role and company.`
+        : `Write a compelling opening paragraph for a cover letter. Express genuine enthusiasm for the specific role and company. Keep it to 2-3 sentences.`,
+      body1: hasExisting
+        ? `Rewrite and improve this first body paragraph. Focus on the applicant's most relevant experience and achievements that match the role.`
+        : `Write the first body paragraph for a cover letter. Highlight the applicant's most relevant work experience and 1-2 specific achievements. Keep it to 3-4 sentences.`,
+      body2: hasExisting
+        ? `Rewrite and improve this second body paragraph. Focus on skills, strengths, and what the applicant brings to the company.`
+        : `Write the second body paragraph for a cover letter. Focus on key skills and why the applicant is a strong fit for this specific company. Keep it to 3-4 sentences.`,
+      closing: hasExisting
+        ? `Rewrite and improve this closing paragraph. Make it confident, action-oriented, and professional.`
+        : `Write a confident closing paragraph for a cover letter. Thank the reader, express enthusiasm for next steps, and invite them to get in touch. Keep it to 2-3 sentences.`,
+    };
+
+    const instruction = sectionInstructions[section];
+    if (!instruction) return res.status(400).json({ error: 'invalid section' });
+
+    const systemPrompt = `You are an expert cover letter writer. Write professional, authentic cover letter content in first person. Be specific and avoid clichés. Return only the paragraph text with no labels, quotes, or extra formatting.`;
+
+    const userPrompt = hasExisting
+      ? `${context}\n\nExisting text to improve:\n"${existingText}"\n\n${instruction}`
+      : `${context}\n\n${instruction}`;
+
+    const text = await callGroq(systemPrompt, userPrompt);
+    res.json({ text });
+  } catch (err) {
+    console.error('/api/generate-cover-letter-section error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST /api/generate-cover-letter-all ───────────────────
+app.post('/api/generate-cover-letter-all', async (req, res) => {
+  try {
+    const { targetCompany, targetRole, resumeInfo } = req.body;
+
+    const name       = resumeInfo?.name       || 'the applicant';
+    const title      = resumeInfo?.title      || '';
+    const skills     = (resumeInfo?.skills    || []).slice(0, 10).join(', ');
+    const experience = (resumeInfo?.experience || [])
+      .filter(e => e.role || e.company)
+      .map(e => `${e.role} at ${e.company}`)
+      .join('; ');
+    const education  = (resumeInfo?.education || [])
+      .map(e => [e.degree, e.field, e.school].filter(Boolean).join(' in '))
+      .join('; ');
+    const summary    = resumeInfo?.summary || '';
+
+    const systemPrompt = `You are an expert cover letter writer. Write professional, authentic cover letter content in first person. Be specific and avoid clichés. Return ONLY valid JSON with no markdown, code fences, or extra text.`;
+
+    const userPrompt = `Write a complete cover letter split into 4 sections for this applicant:
+
+Applicant: ${name}${title ? `, ${title}` : ''}
+Target Role: ${targetRole || 'not specified'}
+Target Company: ${targetCompany || 'not specified'}
+Experience: ${experience || 'not provided'}
+Education: ${education || 'not provided'}
+Skills: ${skills || 'not provided'}
+${summary ? `Summary: ${summary}` : ''}
+
+Return exactly this JSON structure:
+{
+  "opening": "2-3 sentence opening expressing enthusiasm for the role and company",
+  "body1": "3-4 sentence paragraph about relevant experience and achievements",
+  "body2": "3-4 sentence paragraph about skills and fit for the company",
+  "closing": "2-3 sentence confident closing with call to action"
+}`;
+
+    const raw     = await callGroq(systemPrompt, userPrompt);
+    const clean   = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const sections = JSON.parse(clean);
+    res.json({ sections });
+  } catch (err) {
+    console.error('/api/generate-cover-letter-all error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Cedar Resumes server running on port ${PORT}`));

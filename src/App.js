@@ -6,30 +6,32 @@ import Dashboard from './components/Dashboard';
 import ProjectHome from './components/ProjectHome';
 import CompareView from './components/CompareView';
 import TemplatePage from './components/TemplatePage';
+import CoverLetterTemplatePage from './components/CoverLetterTemplatePage';
+import CoverLetterBuilder from './components/CoverLetterBuilder';
 import { TEMPLATES } from './data/templates';
 import { DEFAULT_STYLES, DEFAULT_PAGE_SETTINGS, buildStylesFromTemplate } from './data/defaults';
+import { COVER_LETTER_TEMPLATES, getCoverLetterTemplate } from './data/coverLetterTemplates';
 import {
   loadProjects, persistProjects,
-  makeProject, makeResumeSlot,
+  makeProject, makeResumeSlot, makeCoverLetterSlot,
   upsertProject, removeProject,
   countTotals, MAX_RESUMES,
-  uniqueProjectName,
+  uniqueProjectName, generateId,
 } from './data/projectStore';
 import { parseResume } from './ai';
 import './App.css';
 
-// ── Default resume for template page previews only ────────
 const DEFAULT_RESUME = {
   personal: {
     name: 'John Smith', title: 'Senior Software Engineer',
     email: 'john.smith@email.com', phone: '+1 (555) 867-5309',
     location: 'Austin, TX', linkedin: 'linkedin.com/in/johnsmith',
     website: 'johnsmith.dev', photo: null,
-    summary: 'Versatile Software Engineer with 8+ years of experience building scalable web applications and leading small engineering teams.',
+    summary: 'Versatile Software Engineer with 8+ years of experience building scalable web applications.',
   },
   experience: [
     { id: 1, company: 'Orion Systems LLC', role: 'Senior Software Engineer', startDate: 'Jan 2022', endDate: '', current: true,
-      bullets: ['Architected a distributed event-processing pipeline handling 12M+ daily transactions, reducing average latency by 41%.', 'Led a team of 5 engineers to migrate a monolithic Rails application to a microservices architecture.'] },
+      bullets: ['Architected a distributed event-processing pipeline handling 12M+ daily transactions.'] },
     { id: 2, company: 'Vantage Loop Co.', role: 'Software Engineer', startDate: 'May 2019', endDate: 'Dec 2021', current: false,
       bullets: ['Built and maintained a customer-facing dashboard used by 30,000+ monthly active users.'] },
   ],
@@ -48,8 +50,11 @@ export default function App() {
   // ── Project state ─────────────────────────────────────
   const [projects,        setProjects]        = useState(() => loadProjects());
   const [activeProjectId, setActiveProjectId] = useState(null);
+  const [activeCoverId,   setActiveCoverId]   = useState(null); // active cover letter id
 
   // ── View routing ──────────────────────────────────────
+  // views: 'dashboard' | 'project-home' | 'template-select' | 'builder'
+  //        'compare' | 'cl-template-select' | 'cl-builder'
   const [view,          setView]          = useState('dashboard');
   const [compareMode,   setCompareMode]   = useState(false);
   const [compareTarget, setCompareTarget] = useState(null);
@@ -66,11 +71,12 @@ export default function App() {
   const [currentTemplateId,    setCurrentTemplateId]    = useState('classic');
 
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null;
+  const activeCoverLetter = activeProject?.coverLetters?.find(cl => cl.id === activeCoverId) ?? null;
 
   // ── Persist to localStorage ───────────────────────────
   useEffect(() => { persistProjects(projects); }, [projects]);
 
-  // ── Auto-save editor state → active project ───────────
+  // ── Auto-save resume editor state → active project ───
   useEffect(() => {
     if (!activeProjectId) return;
     setProjects(prev => {
@@ -80,10 +86,9 @@ export default function App() {
       const shouldAutoRename =
         (proj.name === 'New Resume' || proj.name === 'New Project' || proj.name === 'Imported Resume') &&
         resume.personal.name;
-
       const autoName = shouldAutoRename
         ? uniqueProjectName(
-            prev.filter(p => p.id !== activeProjectId), // exclude self so it doesn't conflict with its own current name
+            prev.filter(p => p.id !== activeProjectId),
             `${resume.personal.name.split(' ')[0]}'s Application`
           )
         : proj.name;
@@ -165,16 +170,74 @@ export default function App() {
   }, [projects]);
 
   const handleNewCoverLetter = useCallback(() => {
-    // Full implementation in step 4
-    console.log('Cover letter builder coming in step 4');
-  }, []);
+    if (!activeProjectId) return;
+    setView('cl-template-select');
+  }, [activeProjectId]);
 
   const handleNewFull = useCallback(() => {
-    // Full implementation in step 5
     handleNewResume();
   }, [handleNewResume]);
 
-  // ── Template select handlers ──────────────────────────
+  // ── Cover letter flow ─────────────────────────────────
+  const handleSelectCLTemplate = useCallback((clTemplate) => {
+    if (!activeProjectId) return;
+    const proj = projects.find(p => p.id === activeProjectId);
+    if (!proj) return;
+
+    // Determine if linked to resume
+    const linkedToResume = !!proj.resume;
+    const cl = makeCoverLetterSlot({
+      templateId:    clTemplate.id,
+      templateName:  clTemplate.name,
+      linkedToResume,
+    });
+    cl.sectionStyles = clTemplate.styles;
+    cl.pageSettings  = clTemplate.pageSettings;
+
+    setProjects(prev => {
+      const p = prev.find(x => x.id === activeProjectId);
+      if (!p) return prev;
+      return upsertProject(prev, { ...p, coverLetters: [...p.coverLetters, cl] });
+    });
+    setActiveCoverId(cl.id);
+    setView('cl-builder');
+  }, [activeProjectId, projects]);
+
+  const handleUpdateCoverLetter = useCallback((updated) => {
+    if (!activeProjectId) return;
+    setProjects(prev => {
+      const proj = prev.find(p => p.id === activeProjectId);
+      if (!proj) return prev;
+      const cls = proj.coverLetters.map(cl => cl.id === updated.id ? updated : cl);
+      return upsertProject(prev, { ...proj, coverLetters: cls });
+    });
+  }, [activeProjectId]);
+
+  const handleEditCoverLetter = useCallback((clId) => {
+    setActiveCoverId(clId);
+    setView('cl-builder');
+  }, []);
+
+  const handleCLDownload = useCallback(async () => {
+    // PDF download for cover letter — uses html2canvas + jsPDF on the preview element
+    try {
+      const el = document.querySelector('.cl-page-sheet');
+      if (!el) return;
+      const { default: html2canvas } = await import('html2canvas');
+      const { jsPDF } = await import('jspdf');
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 8.5, 11);
+      const name = activeProject?.resume?.data?.personal?.name
+                || activeCoverLetter?.standaloneInfo?.name
+                || 'cover_letter';
+      pdf.save(`${name}_cover_letter.pdf`);
+    } catch (err) {
+      console.error('CL PDF export failed:', err);
+    }
+  }, [activeProject, activeCoverLetter]);
+
+  // ── Resume template select handlers ──────────────────
   const handleSelectTemplate = useCallback((template) => {
     if (compareMode) {
       setCompareMode(false);
@@ -186,10 +249,8 @@ export default function App() {
       setView('compare');
       return;
     }
-
     applyTemplate(template);
     const merged = buildStylesFromTemplate(template);
-
     setProjects(prev => {
       const proj = prev.find(p => p.id === activeProjectId);
       if (!proj) return prev;
@@ -198,7 +259,6 @@ export default function App() {
         : { ...makeResumeSlot({ templateId: template.id, templateName: template.name, sectionStyles: merged, pageSettings: template.pageSettings }), data: resume };
       return upsertProject(prev, { ...proj, resume: updatedSlot });
     });
-
     setView('builder');
   }, [compareMode, applyTemplate, activeProjectId, resume]);
 
@@ -215,8 +275,8 @@ export default function App() {
   }, [compareMode, projects, activeProjectId]);
 
   // ── Compare handlers ──────────────────────────────────
-  const handleOpenCompare   = useCallback(() => { setCompareMode(true); setView('template-select'); }, []);
-  const handleKeepCurrent   = useCallback(() => { setCompareTarget(null); setView('builder'); }, []);
+  const handleOpenCompare    = useCallback(() => { setCompareMode(true); setView('template-select'); }, []);
+  const handleKeepCurrent    = useCallback(() => { setCompareTarget(null); setView('builder'); }, []);
   const handleSwitchTemplate = useCallback(() => {
     if (compareTarget) applyTemplate(compareTarget.template);
     setCompareTarget(null);
@@ -253,7 +313,6 @@ export default function App() {
     setProjects(prev => [...prev, proj]);
     setActiveProjectId(proj.id);
     setResume(EMPTY_RESUME);
-
     try {
       const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
       pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -283,20 +342,20 @@ export default function App() {
       setUploadStatus('error');
       setTimeout(() => setUploadStatus(null), 3000);
     }
-  }, []);
+  }, [projects]);
 
   // ── Resume mutation handlers ──────────────────────────
-  const updatePersonal   = (f, v) => setResume(r => ({ ...r, personal: { ...r.personal, [f]: v } }));
-  const addExperience    = ()     => setResume(r => ({ ...r, experience: [...r.experience, { id: Date.now(), company: '', role: '', startDate: '', endDate: '', current: false, bullets: [''] }] }));
-  const updateExperience = (id,f,v) => setResume(r => ({ ...r, experience: r.experience.map(e => e.id===id ? {...e,[f]:v} : e) }));
-  const removeExperience = (id)   => setResume(r => ({ ...r, experience: r.experience.filter(e => e.id !== id) }));
-  const addEducation     = ()     => setResume(r => ({ ...r, education: [...r.education, { id: Date.now(), school: '', degree: '', field: '', startDate: '', endDate: '', gpa: '' }] }));
-  const updateEducation  = (id,f,v) => setResume(r => ({ ...r, education: r.education.map(e => e.id===id ? {...e,[f]:v} : e) }));
-  const removeEducation  = (id)   => setResume(r => ({ ...r, education: r.education.filter(e => e.id !== id) }));
-  const addSkill         = (s)    => { if (s && !resume.skills.includes(s)) setResume(r => ({ ...r, skills: [...r.skills, s] })); };
-  const removeSkill      = (s)    => setResume(r => ({ ...r, skills: r.skills.filter(k => k !== s) }));
-  const updateSectionStyle = (section, field, value) => setSectionStyles(s => ({ ...s, [section]: { ...s[section], [field]: value } }));
-  const updatePageSetting  = (field, value)           => setPageSettings(s => ({ ...s, [field]: value }));
+  const updatePersonal     = (f,v) => setResume(r => ({ ...r, personal: { ...r.personal, [f]: v } }));
+  const addExperience      = ()    => setResume(r => ({ ...r, experience: [...r.experience, { id: Date.now(), company: '', role: '', startDate: '', endDate: '', current: false, bullets: [''] }] }));
+  const updateExperience   = (id,f,v) => setResume(r => ({ ...r, experience: r.experience.map(e => e.id===id ? {...e,[f]:v} : e) }));
+  const removeExperience   = (id)  => setResume(r => ({ ...r, experience: r.experience.filter(e => e.id !== id) }));
+  const addEducation       = ()    => setResume(r => ({ ...r, education: [...r.education, { id: Date.now(), school: '', degree: '', field: '', startDate: '', endDate: '', gpa: '' }] }));
+  const updateEducation    = (id,f,v) => setResume(r => ({ ...r, education: r.education.map(e => e.id===id ? {...e,[f]:v} : e) }));
+  const removeEducation    = (id)  => setResume(r => ({ ...r, education: r.education.filter(e => e.id !== id) }));
+  const addSkill           = (s)   => { if (s && !resume.skills.includes(s)) setResume(r => ({ ...r, skills: [...r.skills, s] })); };
+  const removeSkill        = (s)   => setResume(r => ({ ...r, skills: r.skills.filter(k => k !== s) }));
+  const updateSectionStyle = (sec,field,val) => setSectionStyles(s => ({ ...s, [sec]: { ...s[sec], [field]: val } }));
+  const updatePageSetting  = (field,val)     => setPageSettings(s => ({ ...s, [field]: val }));
 
   // ── View routing ──────────────────────────────────────
   if (view === 'dashboard') {
@@ -324,8 +383,8 @@ export default function App() {
         onCompareResumeTemplate={handleOpenCompare}
         onUpdateName={handleUpdateProjectName}
         onDeleteResume={handleDeleteResume}
-        onAddCoverLetter={() => handleNewCoverLetter()}
-        onEditCoverLetter={(clId) => console.log('Edit cover letter', clId)}
+        onAddCoverLetter={handleNewCoverLetter}
+        onEditCoverLetter={handleEditCoverLetter}
       />
     );
   }
@@ -337,6 +396,36 @@ export default function App() {
         onSelectTemplate={handleSelectTemplate}
         onBack={handleBackFromTemplateSelect}
         defaultResume={DEFAULT_RESUME}
+      />
+    );
+  }
+
+  if (view === 'cl-template-select') {
+    return (
+      <CoverLetterTemplatePage
+        onSelectTemplate={handleSelectCLTemplate}
+        onBack={() => setView('project-home')}
+        resumeTemplateId={activeProject?.resume?.templateId ?? null}
+      />
+    );
+  }
+
+  if (view === 'cl-builder' && activeCoverLetter) {
+    const clTemplate = COVER_LETTER_TEMPLATES.find(t => t.id === activeCoverLetter.templateId)
+                    ?? COVER_LETTER_TEMPLATES[0];
+    const resumeData = activeCoverLetter.linkedToResume && activeProject?.resume
+      ? activeProject.resume.data
+      : null;
+    return (
+      <CoverLetterBuilder
+        coverLetter={activeCoverLetter}
+        resumeData={resumeData}
+        templateStyles={clTemplate.styles}
+        pageSettings={clTemplate.pageSettings}
+        templateName={clTemplate.name}
+        onBack={() => setView('project-home')}
+        onChange={handleUpdateCoverLetter}
+        onDownload={handleCLDownload}
       />
     );
   }

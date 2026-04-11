@@ -139,15 +139,9 @@ function ResumeCard({ resume, onEdit, onChangeTemplate, onCompare, onDelete }) {
 
 // ── Cover letters card ────────────────────────────────────
 function CoverLettersCard({ project, onAddCoverLetter, onEditCoverLetter }) {
-  const [showComingSoon, setShowComingSoon] = useState(false);
   const cls = project.coverLetters;
   const atLimit = cls.length >= MAX_COVER_LETTERS_PER_PROJECT;
   const hasResume = !!project.resume;
-
-  const handleAdd = () => {
-    setShowComingSoon(true);
-    setTimeout(() => setShowComingSoon(false), 2500);
-  };
 
   return (
     <div className="proj-doc-card cl-card">
@@ -168,12 +162,9 @@ function CoverLettersCard({ project, onAddCoverLetter, onEditCoverLetter }) {
               💡 Add a resume first so the AI has more to work with.
             </p>
           )}
-          <button className="btn-proj-doc-create" onClick={handleAdd}>
+          <button className="btn-proj-doc-create" onClick={onAddCoverLetter}>
             + Add Cover Letter
           </button>
-          {showComingSoon && (
-            <p className="proj-cl-coming-soon">✨ Cover letter builder coming soon!</p>
-          )}
         </div>
       ) : (
         <div className="proj-cl-list">

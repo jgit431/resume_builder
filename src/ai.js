@@ -21,7 +21,6 @@ export async function suggestSummary({ name, title, skills, experience, existing
 
 export async function suggestBullets({ role, company, existingBullets }) {
   const { bullets } = await post('/api/suggest-bullets', { role, company, existingBullets });
-  // bullets is already [{text, index}] from the server
   return bullets;
 }
 
@@ -30,3 +29,16 @@ export async function parseResume({ text }) {
   return resume;
 }
 
+export async function generateCoverLetterSection({ section, targetCompany, targetRole, existingText, resumeInfo }) {
+  const { text } = await post('/api/generate-cover-letter-section', {
+    section, targetCompany, targetRole, existingText, resumeInfo,
+  });
+  return text;
+}
+
+export async function generateCoverLetterAll({ targetCompany, targetRole, resumeInfo }) {
+  const { sections } = await post('/api/generate-cover-letter-all', {
+    targetCompany, targetRole, resumeInfo,
+  });
+  return sections;
+}
