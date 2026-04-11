@@ -77,10 +77,16 @@ export default function App() {
       const proj = prev.find(p => p.id === activeProjectId);
       if (!proj || !proj.resume) return prev;
 
-      const autoName =
-        (proj.name === 'New Resume' || proj.name === 'New Project' || proj.name === 'Imported Resume') && resume.personal.name
-          ? `${resume.personal.name.split(' ')[0]}'s Application`
-          : proj.name;
+      const shouldAutoRename =
+        (proj.name === 'New Resume' || proj.name === 'New Project' || proj.name === 'Imported Resume') &&
+        resume.personal.name;
+
+      const autoName = shouldAutoRename
+        ? uniqueProjectName(
+            prev.filter(p => p.id !== activeProjectId), // exclude self so it doesn't conflict with its own current name
+            `${resume.personal.name.split(' ')[0]}'s Application`
+          )
+        : proj.name;
 
       return upsertProject(prev, {
         ...proj,
