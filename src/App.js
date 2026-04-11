@@ -16,7 +16,7 @@ import {
   makeProject, makeResumeSlot, makeCoverLetterSlot,
   upsertProject, removeProject,
   countTotals, MAX_RESUMES,
-  uniqueProjectName, generateId,
+  uniqueProjectName,
 } from './data/projectStore';
 import { parseResume } from './ai';
 import './App.css';
@@ -46,18 +46,47 @@ const EMPTY_RESUME = {
   experience: [], education: [], skills: [],
 };
 
+// ── Template sync modal ───────────────────────────────────
+function TemplateSyncModal({ resumeTemplateName, coverLetterTemplateName, onSync, onKeep }) {
+  return (
+    <div className="nudge-overlay" onClick={onKeep}>
+      <div className="nudge-modal" onClick={e => e.stopPropagation()}>
+        <div className="nudge-icon">🔗</div>
+        <h2 className="nudge-title">Update cover letter to match?</h2>
+        <p className="nudge-body">
+          You switched your resume to the <strong>{resumeTemplateName}</strong> template.
+          Your linked cover letter can be updated to the matching <strong>{coverLetterTemplateName}</strong> style to keep everything consistent.
+        </p>
+        <div className="nudge-actions">
+          <button className="btn-nudge-resume" onClick={onSync}>
+            Yes, update cover letter
+          </button>
+          <button className="btn-nudge-proceed" onClick={onKeep}>
+            No, keep current style
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   // ── Project state ─────────────────────────────────────
   const [projects,        setProjects]        = useState(() => loadProjects());
   const [activeProjectId, setActiveProjectId] = useState(null);
-  const [activeCoverId,   setActiveCoverId]   = useState(null); // active cover letter id
+  const [activeCoverId,   setActiveCoverId]   = useState(null);
 
   // ── View routing ──────────────────────────────────────
-  // views: 'dashboard' | 'project-home' | 'template-select' | 'builder'
-  //        'compare' | 'cl-template-select' | 'cl-builder'
   const [view,          setView]          = useState('dashboard');
   const [compareMode,   setCompareMode]   = useState(false);
   const [compareTarget, setCompareTarget] = useState(null);
+  const [fullAppMode,   setFullAppMode]   = useState(false); // true during full application setup
+
+  // ── Template sync prompt state ────────────────────────
+  // { resumeTemplateName, matchingCLTemplate } — shown after template change
+  const [syncPrompt, setSyncPrompt] = useState(null);
+  // The view to navigate to after dismissing the sync prompt
+  const [syncDestView, setSyncDestView] = useState('builder');
 
   // ── Working resume state ──────────────────────────────
   const [resume,               setResume]               = useState(EMPTY_RESUME);
@@ -70,7 +99,7 @@ export default function App() {
   const [currentTemplateName,  setCurrentTemplateName]  = useState('Classic');
   const [currentTemplateId,    setCurrentTemplateId]    = useState('classic');
 
-  const activeProject = projects.find(p => p.id === activeProjectId) ?? null;
+  const activeProject     = projects.find(p => p.id === activeProjectId) ?? null;
   const activeCoverLetter = activeProject?.coverLetters?.find(cl => cl.id === activeCoverId) ?? null;
 
   // ── Persist to localStorage ───────────────────────────
@@ -98,7 +127,7 @@ export default function App() {
         name: autoName,
         resume: {
           ...proj.resume,
-          templateId: currentTemplateId,
+          templateId:   currentTemplateId,
           templateName: currentTemplateName,
           sectionStyles,
           pageSettings,
@@ -142,6 +171,52 @@ export default function App() {
     }
   }, []);
 
+  // ── Check for linked cover letters and prompt sync ────
+  const checkAndPromptSync = useCallback((newTemplate, destView) => {
+    const proj = projects.find(p => p.id === activeProjectId);
+    const linkedCLs = proj?.coverLetters?.filter(cl => cl.linkedToResume) ?? [];
+    if (linkedCLs.length === 0) {
+      setView(destView);
+      return;
+    }
+    const matchingCLTemplate = getCoverLetterTemplate(newTemplate.id);
+    // Only prompt if the matching CL template is different from what's already used
+    const alreadyMatching = linkedCLs.every(cl => cl.templateId === matchingCLTemplate.id);
+    if (alreadyMatching) {
+      setView(destView);
+      return;
+    }
+    setSyncDestView(destView);
+    setSyncPrompt({
+      resumeTemplateName:      newTemplate.name,
+      matchingCLTemplate,
+    });
+  }, [projects, activeProjectId]);
+
+  // ── Sync all linked cover letters to matching template ─
+  const handleSyncCoverLetters = useCallback(() => {
+    if (!syncPrompt) return;
+    const { matchingCLTemplate } = syncPrompt;
+    setProjects(prev => {
+      const proj = prev.find(p => p.id === activeProjectId);
+      if (!proj) return prev;
+      const updatedCLs = proj.coverLetters.map(cl =>
+        cl.linkedToResume
+          ? { ...cl, templateId: matchingCLTemplate.id, templateName: matchingCLTemplate.name,
+              sectionStyles: matchingCLTemplate.styles, pageSettings: matchingCLTemplate.pageSettings }
+          : cl
+      );
+      return upsertProject(prev, { ...proj, coverLetters: updatedCLs });
+    });
+    setSyncPrompt(null);
+    setView(syncDestView);
+  }, [syncPrompt, activeProjectId, syncDestView]);
+
+  const handleDismissSync = useCallback(() => {
+    setSyncPrompt(null);
+    setView(syncDestView);
+  }, [syncDestView]);
+
   // ── Dashboard handlers ────────────────────────────────
   const handleOpenProject = useCallback((project) => {
     setActiveProjectId(project.id);
@@ -175,8 +250,20 @@ export default function App() {
   }, [activeProjectId]);
 
   const handleNewFull = useCallback(() => {
-    handleNewResume();
-  }, [handleNewResume]);
+    const { resumes } = countTotals(projects);
+    if (resumes >= MAX_RESUMES) return;
+    const proj = makeProject({ type: 'full', name: uniqueProjectName(projects, 'New Application') });
+    setProjects(prev => [...prev, proj]);
+    setActiveProjectId(proj.id);
+    setResume(EMPTY_RESUME);
+    setSectionStyles(DEFAULT_STYLES);
+    setPageSettings(DEFAULT_PAGE_SETTINGS);
+    setCurrentTemplateName('Classic');
+    setCurrentTemplateId('classic');
+    setCompareMode(false);
+    setFullAppMode(true);
+    setView('template-select');
+  }, [projects]);
 
   // ── Cover letter flow ─────────────────────────────────
   const handleSelectCLTemplate = useCallback((clTemplate) => {
@@ -184,13 +271,8 @@ export default function App() {
     const proj = projects.find(p => p.id === activeProjectId);
     if (!proj) return;
 
-    // Determine if linked to resume
     const linkedToResume = !!proj.resume;
-    const cl = makeCoverLetterSlot({
-      templateId:    clTemplate.id,
-      templateName:  clTemplate.name,
-      linkedToResume,
-    });
+    const cl = makeCoverLetterSlot({ templateId: clTemplate.id, templateName: clTemplate.name, linkedToResume });
     cl.sectionStyles = clTemplate.styles;
     cl.pageSettings  = clTemplate.pageSettings;
 
@@ -200,8 +282,15 @@ export default function App() {
       return upsertProject(prev, { ...p, coverLetters: [...p.coverLetters, cl] });
     });
     setActiveCoverId(cl.id);
-    setView('cl-builder');
-  }, [activeProjectId, projects]);
+
+    if (fullAppMode) {
+      // Full application flow complete — land in the resume builder
+      setFullAppMode(false);
+      setView('builder');
+    } else {
+      setView('cl-builder');
+    }
+  }, [activeProjectId, projects, fullAppMode]);
 
   const handleUpdateCoverLetter = useCallback((updated) => {
     if (!activeProjectId) return;
@@ -218,24 +307,14 @@ export default function App() {
     setView('cl-builder');
   }, []);
 
-  const handleCLDownload = useCallback(async () => {
-    // PDF download for cover letter — uses html2canvas + jsPDF on the preview element
-    try {
-      const el = document.querySelector('.cl-page-sheet');
-      if (!el) return;
-      const { default: html2canvas } = await import('html2canvas');
-      const { jsPDF } = await import('jspdf');
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 8.5, 11);
-      const name = activeProject?.resume?.data?.personal?.name
-                || activeCoverLetter?.standaloneInfo?.name
-                || 'cover_letter';
-      pdf.save(`${name}_cover_letter.pdf`);
-    } catch (err) {
-      console.error('CL PDF export failed:', err);
-    }
-  }, [activeProject, activeCoverLetter]);
+  const handleDeleteCoverLetter = useCallback((clId) => {
+    if (!activeProjectId) return;
+    setProjects(prev => {
+      const proj = prev.find(p => p.id === activeProjectId);
+      if (!proj) return prev;
+      return upsertProject(prev, { ...proj, coverLetters: proj.coverLetters.filter(cl => cl.id !== clId) });
+    });
+  }, [activeProjectId]);
 
   // ── Resume template select handlers ──────────────────
   const handleSelectTemplate = useCallback((template) => {
@@ -259,11 +338,24 @@ export default function App() {
         : { ...makeResumeSlot({ templateId: template.id, templateName: template.name, sectionStyles: merged, pageSettings: template.pageSettings }), data: resume };
       return upsertProject(prev, { ...proj, resume: updatedSlot });
     });
-    setView('builder');
-  }, [compareMode, applyTemplate, activeProjectId, resume]);
+    if (fullAppMode) {
+      // Full application — go straight to cover letter template picker next
+      setView('cl-template-select');
+    } else {
+      checkAndPromptSync(template, 'builder');
+    }
+  }, [compareMode, applyTemplate, activeProjectId, resume, fullAppMode, checkAndPromptSync]);
 
   const handleBackFromTemplateSelect = useCallback(() => {
     if (compareMode) { setCompareMode(false); setView('builder'); return; }
+    if (fullAppMode) {
+      // Cancel full application setup — delete the stub project
+      setFullAppMode(false);
+      setProjects(prev => removeProject(prev, activeProjectId));
+      setActiveProjectId(null);
+      setView('dashboard');
+      return;
+    }
     const proj = projects.find(p => p.id === activeProjectId);
     if (proj && !proj.resume) {
       setProjects(prev => removeProject(prev, activeProjectId));
@@ -272,16 +364,31 @@ export default function App() {
     } else {
       setView(proj ? 'project-home' : 'dashboard');
     }
-  }, [compareMode, projects, activeProjectId]);
+  }, [compareMode, fullAppMode, projects, activeProjectId]);
 
   // ── Compare handlers ──────────────────────────────────
   const handleOpenCompare    = useCallback(() => { setCompareMode(true); setView('template-select'); }, []);
   const handleKeepCurrent    = useCallback(() => { setCompareTarget(null); setView('builder'); }, []);
   const handleSwitchTemplate = useCallback(() => {
-    if (compareTarget) applyTemplate(compareTarget.template);
-    setCompareTarget(null);
-    setView('builder');
-  }, [compareTarget, applyTemplate]);
+    if (compareTarget) {
+      applyTemplate(compareTarget.template);
+      const merged = buildStylesFromTemplate(compareTarget.template);
+      setProjects(prev => {
+        const proj = prev.find(p => p.id === activeProjectId);
+        if (!proj || !proj.resume) return prev;
+        return upsertProject(prev, {
+          ...proj,
+          resume: { ...proj.resume, templateId: compareTarget.template.id, templateName: compareTarget.template.name, sectionStyles: merged, pageSettings: compareTarget.template.pageSettings },
+        });
+      });
+      const newTemplate = compareTarget.template;
+      setCompareTarget(null);
+      checkAndPromptSync(newTemplate, 'builder');
+    } else {
+      setCompareTarget(null);
+      setView('builder');
+    }
+  }, [compareTarget, applyTemplate, activeProjectId, checkAndPromptSync]);
 
   // ── Project home handlers ─────────────────────────────
   const handleUpdateProjectName = useCallback((name) => {
@@ -354,8 +461,8 @@ export default function App() {
   const removeEducation    = (id)  => setResume(r => ({ ...r, education: r.education.filter(e => e.id !== id) }));
   const addSkill           = (s)   => { if (s && !resume.skills.includes(s)) setResume(r => ({ ...r, skills: [...r.skills, s] })); };
   const removeSkill        = (s)   => setResume(r => ({ ...r, skills: r.skills.filter(k => k !== s) }));
-  const updateSectionStyle = (sec,field,val) => setSectionStyles(s => ({ ...s, [sec]: { ...s[sec], [field]: val } }));
-  const updatePageSetting  = (field,val)     => setPageSettings(s => ({ ...s, [field]: val }));
+  const updateSectionStyle = (sec,f,v) => setSectionStyles(s => ({ ...s, [sec]: { ...s[sec], [f]: v } }));
+  const updatePageSetting  = (f,v)    => setPageSettings(s => ({ ...s, [f]: v }));
 
   // ── View routing ──────────────────────────────────────
   if (view === 'dashboard') {
@@ -385,6 +492,7 @@ export default function App() {
         onDeleteResume={handleDeleteResume}
         onAddCoverLetter={handleNewCoverLetter}
         onEditCoverLetter={handleEditCoverLetter}
+        onDeleteCoverLetter={handleDeleteCoverLetter}
       />
     );
   }
@@ -393,6 +501,7 @@ export default function App() {
     return (
       <TemplatePage
         compareMode={compareMode}
+        fullAppMode={fullAppMode}
         onSelectTemplate={handleSelectTemplate}
         onBack={handleBackFromTemplateSelect}
         defaultResume={DEFAULT_RESUME}
@@ -404,8 +513,9 @@ export default function App() {
     return (
       <CoverLetterTemplatePage
         onSelectTemplate={handleSelectCLTemplate}
-        onBack={() => setView('project-home')}
+        onBack={() => fullAppMode ? setView('template-select') : setView('project-home')}
         resumeTemplateId={activeProject?.resume?.templateId ?? null}
+        fullAppMode={fullAppMode}
       />
     );
   }
@@ -416,6 +526,9 @@ export default function App() {
     const resumeData = activeCoverLetter.linkedToResume && activeProject?.resume
       ? activeProject.resume.data
       : null;
+    const personName = resumeData?.personal?.name
+                    || activeCoverLetter?.standaloneInfo?.name
+                    || 'cover_letter';
     return (
       <CoverLetterBuilder
         coverLetter={activeCoverLetter}
@@ -425,7 +538,7 @@ export default function App() {
         templateName={clTemplate.name}
         onBack={() => setView('project-home')}
         onChange={handleUpdateCoverLetter}
-        onDownload={handleCLDownload}
+        personName={personName}
       />
     );
   }
@@ -479,6 +592,16 @@ export default function App() {
           onBackToProject={() => setView('project-home')}
         />
       </div>
+
+      {/* ── Template sync prompt ── */}
+      {syncPrompt && (
+        <TemplateSyncModal
+          resumeTemplateName={syncPrompt.resumeTemplateName}
+          coverLetterTemplateName={syncPrompt.matchingCLTemplate.name}
+          onSync={handleSyncCoverLetters}
+          onKeep={handleDismissSync}
+        />
+      )}
     </div>
   );
 }

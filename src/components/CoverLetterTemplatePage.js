@@ -4,8 +4,7 @@ import Header from './Header';
 import './TemplatePage.css';
 import './CoverLetterTemplatePage.css';
 
-export default function CoverLetterTemplatePage({ onSelectTemplate, onBack, resumeTemplateId }) {
-  // The matching template is the one whose resumeTemplateId equals the project's resume template
+export default function CoverLetterTemplatePage({ onSelectTemplate, onBack, resumeTemplateId, fullAppMode = false }) {
   const matchId = COVER_LETTER_TEMPLATES.find(t => t.resumeTemplateId === resumeTemplateId)?.id ?? null;
 
   return (
@@ -13,7 +12,9 @@ export default function CoverLetterTemplatePage({ onSelectTemplate, onBack, resu
       <Header onHome={onBack} />
 
       <main className="template-page-main">
-        <button className="template-page-back" onClick={onBack}>← Back</button>
+        <button className="template-page-back" onClick={onBack}>
+          {fullAppMode ? '← Back to Resume Template' : '← Back'}
+        </button>
 
         <div className="template-page-hero">
           <div className="template-compare-banner">
@@ -21,7 +22,7 @@ export default function CoverLetterTemplatePage({ onSelectTemplate, onBack, resu
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
               <polyline points="22,6 12,13 2,6"/>
             </svg>
-            Cover Letter
+            {fullAppMode ? 'Full Application — Step 2 of 2' : 'Cover Letter'}
           </div>
           <h1 className="template-page-title">Choose a cover letter style</h1>
           <p className="template-page-subtitle">

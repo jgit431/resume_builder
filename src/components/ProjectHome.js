@@ -138,7 +138,8 @@ function ResumeCard({ resume, onEdit, onChangeTemplate, onCompare, onDelete }) {
 }
 
 // ── Cover letters card ────────────────────────────────────
-function CoverLettersCard({ project, onAddCoverLetter, onEditCoverLetter }) {
+function CoverLettersCard({ project, onAddCoverLetter, onEditCoverLetter, onDeleteCoverLetter }) {
+  const [confirmId, setConfirmId] = useState(null);
   const cls = project.coverLetters;
   const atLimit = cls.length >= MAX_COVER_LETTERS_PER_PROJECT;
   const hasResume = !!project.resume;
@@ -169,7 +170,7 @@ function CoverLettersCard({ project, onAddCoverLetter, onEditCoverLetter }) {
       ) : (
         <div className="proj-cl-list">
           {cls.map(cl => (
-            <div key={cl.id} className="proj-cl-item" onClick={() => onEditCoverLetter(cl.id)}>
+            <div key={cl.id} className="proj-cl-item" onClick={() => confirmId !== cl.id && onEditCoverLetter(cl.id)}>
               <div className="proj-cl-item-info">
                 <div className="proj-cl-company">{cl.targetCompany || 'Untitled'}</div>
                 {cl.targetRole && <div className="proj-cl-role">{cl.targetRole}</div>}
@@ -180,9 +181,24 @@ function CoverLettersCard({ project, onAddCoverLetter, onEditCoverLetter }) {
                 )}
                 <span className="proj-cl-template-badge">{cl.templateName}</span>
               </div>
-              <button className="btn-proj-cl-edit" onClick={e => { e.stopPropagation(); onEditCoverLetter(cl.id); }}>
-                Edit →
-              </button>
+              {confirmId === cl.id ? (
+                <div className="proj-doc-delete-confirm" onClick={e => e.stopPropagation()}>
+                  <span>Delete?</span>
+                  <button className="btn-proj-confirm-yes" onClick={() => { setConfirmId(null); onDeleteCoverLetter(cl.id); }}>Yes</button>
+                  <button className="btn-proj-confirm-no"  onClick={() => setConfirmId(null)}>No</button>
+                </div>
+              ) : (
+                <div className="proj-cl-item-actions" onClick={e => e.stopPropagation()}>
+                  <button className="btn-proj-cl-edit" onClick={() => onEditCoverLetter(cl.id)}>Edit →</button>
+                  <button className="btn-proj-cl-delete" onClick={() => setConfirmId(cl.id)} title="Delete cover letter">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                      <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
           ))}
           {!atLimit && (
@@ -207,6 +223,7 @@ export default function ProjectHome({
   onDeleteResume,
   onAddCoverLetter,
   onEditCoverLetter,
+  onDeleteCoverLetter,
 }) {
   return (
     <div className="proj-home">
@@ -237,6 +254,7 @@ export default function ProjectHome({
             project={project}
             onAddCoverLetter={onAddCoverLetter}
             onEditCoverLetter={onEditCoverLetter}
+            onDeleteCoverLetter={onDeleteCoverLetter}
           />
         </div>
       </main>
