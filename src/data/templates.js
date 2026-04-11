@@ -160,18 +160,23 @@ export function TemplateSVG({ template }) {
 
   // ── Executive Photo layout thumbnail ──────────────────────
   if (layout === 'executive-photo') {
-    const photoPos = pageSettings.photoPosition ?? 'left';
-    const photoX = photoPos === 'right' ? 88 : 10;
-    const textX  = photoPos === 'right' ? 10 : 32;
-    const textW  = 70;
+    const photoPos      = pageSettings.photoPosition ?? 'left';
+    const photoX        = photoPos === 'right' ? 88 : 10;
+    const textAreaLeft  = photoPos === 'right' ? 10 : 32;
+    const textAreaRight = photoPos === 'right' ? 84 : 118;
+    const textCenter    = textAreaLeft + (textAreaRight - textAreaLeft) / 2;
+    // Center each header block within the text area
+    const nameX    = Math.round(textCenter - 26); // block w=52
+    const titleX   = Math.round(textCenter - 18); // block w=36
+    const contactX = Math.max(textAreaLeft, Math.round(textCenter - 31)); // block w=62
     return (
       <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: '100%' }}>
         <rect width={W} height={H} fill="white"/>
         <circle cx={photoX + 11} cy={16} r={11} fill="#ddd"/>
         <circle cx={photoX + 11} cy={16} r={11} fill="none" stroke={noColor ? '#888' : color} strokeWidth={1.5}/>
-        <rect x={textX} y={8} width={52} height={5} rx={0.5} fill="#1a1a1a"/>
-        <rect x={textX+6} y={16} width={38} height={3} rx={0.5} fill="#666"/>
-        <rect x={textX} y={22} width={textW} height={2} rx={0.5} fill="#bbb"/>
+        <rect x={nameX}    y={8}  width={52} height={5}   rx={0.5} fill="#1a1a1a"/>
+        <rect x={titleX}   y={16} width={36} height={3}   rx={0.5} fill="#666"/>
+        <rect x={contactX} y={22} width={62} height={2}   rx={0.5} fill="#bbb"/>
         <rect x={10} y={32} width={100} height={1.5} fill={noColor ? '#1a1a1a' : color}/>
         <rect x={10} y={38} width={30} height={2.5} rx={0.5} fill={noColor ? '#555' : color}/>
         <rect x={10} y={42} width={100} height={0.5} fill="#ccc"/>
@@ -186,7 +191,7 @@ export function TemplateSVG({ template }) {
         <rect x={10} y={118} width={22} height={2.5} rx={0.5} fill={noColor ? '#555' : color}/>
         <rect x={10} y={122} width={100} height={0.5} fill="#ccc"/>
         <rect x={10} y={126} width={100} height={2.5} rx={0.5} fill="#e8e8e8"/>
-        <rect x={10} y={131} width={70} height={2.5} rx={0.5} fill="#e8e8e8"/>
+        <rect x={10} y={131} width={70}  height={2.5} rx={0.5} fill="#e8e8e8"/>
       </svg>
     );
   }
