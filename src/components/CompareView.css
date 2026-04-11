@@ -89,22 +89,47 @@
   color: var(--ink);
 }
 
-/* ── Preview wrapper ── */
-.compare-preview-wrap {
-  /* width + height set inline via JS based on scale */
+/* ── One page sheet ── */
+.compare-page-sheet {
   position: relative;
-  overflow: hidden;
+  width: 100%;
   background: #fff;
   box-shadow: 0 2px 16px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
   border-radius: 2px;
+  overflow: hidden;
+  /* height set inline from PAGE_H */
 }
 
-.compare-preview-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
-  /* width: 650px and transform: scale(X) set inline */
+/* ── Gap between pages ── */
+.compare-page-gap {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+}
+
+.compare-page-gap-rule {
+  flex: 1;
+  border-top: 2px dotted #b5aca0;
+}
+
+.compare-page-gap-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b5aca0;
+  white-space: nowrap;
+}
+
+/* ── Page count badge below preview ── */
+.compare-page-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  text-align: center;
+  padding: 4px 0 0;
 }
 
 /* ── Fixed bottom action bar ── */
