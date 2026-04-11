@@ -92,6 +92,9 @@ const DEFAULT_STYLES = {
     headerAlign: 'left',
     showIcons: true,
     iconColor: 'default',
+    headerFont: 'DM Serif Display',
+    headerNameSize: 32,
+    headerContactSize: 12,
   },
   experience: {
     fontFamily: 'DM Sans',

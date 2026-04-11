@@ -56,14 +56,17 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
-  const align      = personalStyles.headerAlign ?? 'left';
-  const showIcons  = personalStyles.showIcons ?? true;
-  const scheme     = getScheme(colorScheme);
-  const accent     = scheme.accent;
-  const noColor    = colorScheme === 'none';
-  const iconColor  = personalStyles.iconColor ?? 'default';
-  const forced     = iconColor === 'accent';
-  const iconCol    = forced ? accent : '#555';
+  const align           = personalStyles.headerAlign ?? 'left';
+  const showIcons       = personalStyles.showIcons ?? true;
+  const scheme          = getScheme(colorScheme);
+  const accent          = scheme.accent;
+  const noColor         = colorScheme === 'none';
+  const iconColor       = personalStyles.iconColor ?? 'default';
+  const forced          = iconColor === 'accent';
+  const iconCol         = forced ? accent : '#555';
+  const headerFont      = personalStyles.headerFont ?? 'DM Serif Display';
+  const headerNameSize  = personalStyles.headerNameSize ?? 32;
+  const headerContactSize = personalStyles.headerContactSize ?? 12;
 
   // Helper to build inline style from formatting object
   const fmt = (f) => f ? {
@@ -77,8 +80,8 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
   const skFmt  = sectionStyles.skills?.formatting     ?? {};
 
   // Section title scales with body font size
-  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 2);
-  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 2);
+  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 1);
+  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 1);
 
   return (
     <div
@@ -93,9 +96,9 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
       ) : (
         <>
           <div className="r-header" style={{ textAlign: align }}>
-            {personal.name  && <h1 className="r-name">{personal.name}</h1>}
+            {personal.name  && <h1 className="r-name" style={{ fontFamily: headerFont, fontSize: `${headerNameSize}px` }}>{personal.name}</h1>}
             {personal.title && <p className="r-title">{personal.title}</p>}
-            <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
+            <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center', fontSize: `${headerContactSize}px` }}>
               {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(iconCol, forced)}{personal.email}</span>}
               {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(iconCol, forced)}{personal.phone}</span>}
               {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(iconCol, forced)}{personal.location}</span>}
@@ -203,17 +206,20 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
   const sidebarBg     = scheme.sidebarBg;
   const sidebarBorder = scheme.sidebarBorder;
   const sidebarW      = '32%';
-  const showIcons     = personalStyles?.showIcons  ?? true;
-  const iconColor     = personalStyles?.iconColor   ?? 'default';
-  const forced        = iconColor === 'accent';
-  const iconCol       = forced ? accent : '#555';
+  const showIcons       = personalStyles?.showIcons ?? true;
+  const iconColor       = personalStyles?.iconColor ?? 'default';
+  const forced          = iconColor === 'accent';
+  const iconCol         = forced ? accent : '#555';
+  const headerFont      = personalStyles?.headerFont ?? 'DM Serif Display';
+  const headerNameSize  = personalStyles?.headerNameSize ?? 32;
+  const headerContactSize = personalStyles?.headerContactSize ?? 12;
 
   const expFmt = sectionStyles.experience?.formatting ?? {};
   const eduFmt = sectionStyles.education?.formatting  ?? {};
   const skFmt  = sectionStyles.skills?.formatting     ?? {};
 
-  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 2);
-  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 2);
+  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 1);
+  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 1);
 
   const fmt = (f) => f ? {
     fontWeight:     f.bold      ? 'bold'      : 'normal',
@@ -240,7 +246,7 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
           </div>
         )}
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
-          {personal.name  && <div style={{ fontWeight: 700, fontSize: 15, color: '#1a1a1a', lineHeight: 1.2 }}>{personal.name}</div>}
+          {personal.name  && <div style={{ fontFamily: headerFont, fontWeight: 700, fontSize: Math.round(headerNameSize * 0.5), color: '#1a1a1a', lineHeight: 1.2 }}>{personal.name}</div>}
           {personal.title && <div style={{ fontSize: 11, color: '#666', marginTop: 3 }}>{personal.title}</div>}
         </div>
 
@@ -254,7 +260,7 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
               personal.linkedin && { icon: SVG_ICONS.linkedin(iconCol, forced), text: personal.linkedin.replace(/^https?:\/\/(www\.)?/, '') },
               personal.website  && { icon: SVG_ICONS.website(iconCol, forced),  text: personal.website.replace(/^https?:\/\/(www\.)?/, '') },
             ].filter(Boolean).map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 10.5, color: '#333', marginBottom: 5, wordBreak: 'break-all' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: headerContactSize, color: '#333', marginBottom: 5, wordBreak: 'break-all' }}>
                 {showIcons && <span style={{ flexShrink: 0, marginTop: 1 }}>{item.icon}</span>}
                 <span>{item.text}</span>
               </div>
@@ -349,11 +355,14 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
   const scheme    = getScheme(colorScheme);
   const accent    = scheme.accent;
   const noColor   = colorScheme === 'none';
-  const align     = personalStyles.headerAlign ?? 'center';
-  const showIcons = personalStyles.showIcons ?? true;
-  const iconColor = personalStyles.iconColor  ?? 'default';
-  const forced    = iconColor === 'accent';
-  const iconCol   = forced ? accent : '#555';
+  const align           = personalStyles.headerAlign ?? 'center';
+  const showIcons       = personalStyles.showIcons ?? true;
+  const iconColor       = personalStyles.iconColor ?? 'default';
+  const forced          = iconColor === 'accent';
+  const iconCol         = forced ? accent : '#555';
+  const headerFont      = personalStyles.headerFont ?? 'DM Serif Display';
+  const headerNameSize  = personalStyles.headerNameSize ?? 32;
+  const headerContactSize = personalStyles.headerContactSize ?? 12;
   const photoSide = photoPosition ?? 'left';
   const PHOTO_SIZE = 72;
 
@@ -361,8 +370,8 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
   const eduFmt = sectionStyles.education?.formatting  ?? {};
   const skFmt  = sectionStyles.skills?.formatting     ?? {};
 
-  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 2);
-  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 2);
+  const expTitleSize = Math.max(9, sectionStyles.experience.fontSize - 1);
+  const eduTitleSize = Math.max(9, sectionStyles.education.fontSize  - 1);
 
   const fmt = (f) => f ? {
     fontWeight:     f.bold      ? 'bold'      : 'normal',
@@ -378,9 +387,9 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
           <img src={personal.photo} alt="Headshot" style={{ width: PHOTO_SIZE, height: PHOTO_SIZE, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2.5px solid ${accent}` }} />
         )}
         <div style={{ flex: 1, textAlign: align }}>
-          {personal.name  && <h1 className="r-name" style={{ fontFamily: sectionStyles.experience.fontFamily }}>{personal.name}</h1>}
+          {personal.name  && <h1 className="r-name" style={{ fontFamily: headerFont, fontSize: `${headerNameSize}px` }}>{personal.name}</h1>}
           {personal.title && <p className="r-title">{personal.title}</p>}
-          <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
+          <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center', fontSize: `${headerContactSize}px` }}>
             {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(iconCol, forced)}{personal.email}</span>}
             {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(iconCol, forced)}{personal.phone}</span>}
             {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(iconCol, forced)}{personal.location}</span>}

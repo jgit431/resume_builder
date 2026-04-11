@@ -136,6 +136,10 @@ function PersonalForm({ data, update, styles, updateStyle, resume, templateFeatu
   const reset = () => {
     updateStyle('headerAlign', 'left');
     updateStyle('showIcons', true);
+    updateStyle('iconColor', 'default');
+    updateStyle('headerFont', 'DM Serif Display');
+    updateStyle('headerNameSize', 32);
+    updateStyle('headerContactSize', 12);
   };
 
   return (
@@ -183,32 +187,72 @@ function PersonalForm({ data, update, styles, updateStyle, resume, templateFeatu
               </div>
             )}
 
-            {/* Icons toggle + color mode — all in one row */}
+            {/* Header Font */}
+            <div className="style-row">
+              <label className="style-label">Name Font</label>
+              <select
+                className="style-select"
+                value={styles.headerFont ?? 'DM Serif Display'}
+                onChange={e => updateStyle('headerFont', e.target.value)}
+              >
+                <option value="DM Serif Display">DM Serif Display</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="DM Sans">DM Sans</option>
+                <option value="Helvetica, Arial, sans-serif">Helvetica</option>
+                <option value="Garamond, serif">Garamond</option>
+                <option value="Courier New, monospace">Courier New</option>
+              </select>
+            </div>
+
+            {/* Header Name Size */}
+            <div className="style-row">
+              <label className="style-label">Name Size <EditableValue value={styles.headerNameSize ?? 32} min={18} max={48} step={1} unit="px" decimals={0} onChange={v => updateStyle('headerNameSize', v)} /></label>
+              <input
+                type="range" min={18} max={48} step={1}
+                value={styles.headerNameSize ?? 32}
+                onChange={e => updateStyle('headerNameSize', parseInt(e.target.value))}
+                className="style-slider"
+              />
+            </div>
+
+            {/* Header Contact Size */}
+            <div className="style-row">
+              <label className="style-label">Contact Size <EditableValue value={styles.headerContactSize ?? 12} min={9} max={16} step={0.5} unit="px" decimals={1} onChange={v => updateStyle('headerContactSize', v)} /></label>
+              <input
+                type="range" min={9} max={16} step={0.5}
+                value={styles.headerContactSize ?? 12}
+                onChange={e => updateStyle('headerContactSize', parseFloat(e.target.value))}
+                className="style-slider"
+              />
+            </div>
+
+            {/* Icons toggle + color mode */}
             <div className="style-row">
               <label className="style-label">Contact Info Icons</label>
-              <div className="separator-toggle">
-                <button
-                  className={`sep-btn ${styles.showIcons ? 'active' : ''}`}
-                  onClick={() => updateStyle('showIcons', !styles.showIcons)}
-                >
-                  Show Icons
-                </button>
-                {styles.showIcons && (<>
-                  <button
-                    className={`sep-btn ${(styles.iconColor ?? 'default') === 'default' ? 'active' : ''}`}
-                    onClick={() => updateStyle('iconColor', 'default')}
-                  >
-                    Default Colors
-                  </button>
-                  <button
-                    className={`sep-btn ${styles.iconColor === 'accent' ? 'active' : ''}`}
-                    onClick={() => updateStyle('iconColor', 'accent')}
-                  >
-                    Theme Colors
-                  </button>
-                </>)}
-              </div>
+              <button
+                className={`sep-btn ${styles.showIcons ? 'active' : ''}`}
+                onClick={() => updateStyle('showIcons', !styles.showIcons)}
+              >
+                Show Icons
+              </button>
             </div>
+            {styles.showIcons && (
+              <div className="separator-toggle row" style={{ marginTop: -2 }}>
+                <button
+                  className={`sep-btn ${(styles.iconColor ?? 'default') === 'default' ? 'active' : ''}`}
+                  onClick={() => updateStyle('iconColor', 'default')}
+                >
+                  Default Colors
+                </button>
+                <button
+                  className={`sep-btn ${styles.iconColor === 'accent' ? 'active' : ''}`}
+                  onClick={() => updateStyle('iconColor', 'accent')}
+                >
+                  Theme Colors
+                </button>
+              </div>
+            )}
 
             <button className="btn-reset-margins" onClick={reset}>
               ↺ Reset to defaults

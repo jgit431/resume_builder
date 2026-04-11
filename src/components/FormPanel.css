@@ -1004,3 +1004,12 @@
   outline: none;
   min-width: 36px;
 }
+
+.separator-toggle.row {
+  flex-direction: row;
+}
+
+.separator-toggle.row .sep-btn {
+  flex: 1;
+  justify-content: center;
+}
