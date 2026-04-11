@@ -314,7 +314,7 @@ export default function App() {
           templateFeatures={templateFeatures}
           templateDefaultStyles={templateDefaultStyles}
         />
-        <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} />
+        <PreviewPanel resume={resume} sectionStyles={sectionStyles} pageSettings={pageSettings} onChangeTemplate={() => setView('template-select')} />
       </div>
     </div>
   );

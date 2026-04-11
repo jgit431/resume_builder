@@ -284,3 +284,24 @@
 .preview-upload-status.status-parsing { background: rgba(201,168,76,0.15); color: #a07820; }
 .preview-upload-status.status-done    { background: rgba(42,107,107,0.15); color: var(--teal); }
 .preview-upload-status.status-error   { background: rgba(200,50,50,0.1);   color: #c00; }
+
+.btn-change-template {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-change-template:hover {
+  background: var(--ink);
+  color: var(--white);
+  transform: translateY(-1px);
+}
