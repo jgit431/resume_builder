@@ -2,12 +2,186 @@ import React, { useState, useRef, useEffect } from 'react';
 import Header from './Header';
 import { getScheme } from '../data/colorSchemes';
 import { generateCoverLetterSection, generateCoverLetterAll } from '../ai';
+import './FormPanel.css';
 import './CoverLetterBuilder.css';
 
 const PAGE_W = 650;
 const PAGE_H = Math.round(PAGE_W / 8.5 * 11); // ~841px
 const INCH   = PAGE_W / 8.5;
 const TODAY  = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const CL_FONT_OPTIONS = [
+  { label: 'DM Sans',         value: 'DM Sans' },
+  { label: 'Georgia',         value: 'Georgia' },
+  { label: 'Times New Roman', value: 'Times New Roman' },
+  { label: 'Helvetica',       value: 'Helvetica, Arial, sans-serif' },
+  { label: 'Garamond',        value: 'Garamond, serif' },
+  { label: 'Courier New',     value: 'Courier New, monospace' },
+];
+
+// ─────────────────────────────────────────────────────────
+// EditableValue — click-to-edit numeric label (same as FormPanel)
+// ─────────────────────────────────────────────────────────
+function EditableValue({ value, min, max, step, unit, decimals, onChange }) {
+  const [editing, setEditing] = useState(false);
+  const [raw,     setRaw]     = useState('');
+
+  const start = () => { setRaw(value.toFixed(decimals)); setEditing(true); };
+  const commit = () => {
+    const n = parseFloat(raw);
+    if (!isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <input
+        className="editable-value-input"
+        value={raw}
+        onChange={e => setRaw(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false); }}
+        autoFocus
+        style={{ width: 52 }}
+      />
+    );
+  }
+  return (
+    <span className="editable-value" onClick={start} title="Click to type a value">
+      {value.toFixed(decimals)}{unit}
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// CLPageSetupForm — mirrors the resume's PageSetupForm
+// ─────────────────────────────────────────────────────────
+function CLPageSetupForm({ settings, onUpdate }) {
+  const MARGIN_MIN  = 0.25;
+  const MARGIN_MAX  = 2.0;
+  const MARGIN_STEP = 0.25;
+
+  const reset = () => {
+    onUpdate('marginTop',    1.0);
+    onUpdate('marginBottom', 1.0);
+    onUpdate('marginLeft',   1.0);
+    onUpdate('marginRight',  1.0);
+    onUpdate('lineHeight',   1.6);
+    onUpdate('bodyFont',    'DM Sans');
+  };
+
+  return (
+    <div className="form-section">
+      <h2 className="section-heading">Page Setup</h2>
+      <p className="page-setup-desc">
+        Adjust font, spacing and margins for your cover letter. All values are in inches.
+      </p>
+
+          {/* Body Font */}
+          <div className="style-row">
+            <label className="style-label">Body Font</label>
+            <select
+              className="style-select"
+              value={settings.bodyFont ?? 'DM Sans'}
+              onChange={e => onUpdate('bodyFont', e.target.value)}
+            >
+              {CL_FONT_OPTIONS.map(f => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Visual margin diagram */}
+          <div className="margin-diagram">
+            <div className="margin-diagram-page">
+              <div className="margin-diagram-top" style={{ height: `${(settings.marginTop / MARGIN_MAX) * 40 + 8}px` }}>
+                <span>{settings.marginTop}"</span>
+              </div>
+              <div className="margin-diagram-middle">
+                <div className="margin-diagram-left" style={{ width: `${(settings.marginLeft / MARGIN_MAX) * 40 + 8}px` }}>
+                  <span>{settings.marginLeft}"</span>
+                </div>
+                <div className="margin-diagram-content">
+                  <div className="margin-diagram-lines">
+                    {[80, 60, 70, 50, 65].map((w, i) => (
+                      <div key={i} className="margin-diagram-line" style={{ width: `${w}%` }} />
+                    ))}
+                  </div>
+                </div>
+                <div className="margin-diagram-right" style={{ width: `${(settings.marginRight / MARGIN_MAX) * 40 + 8}px` }}>
+                  <span>{settings.marginRight}"</span>
+                </div>
+              </div>
+              <div className="margin-diagram-bottom" style={{ height: `${(settings.marginBottom / MARGIN_MAX) * 40 + 8}px` }}>
+                <span>{settings.marginBottom}"</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Line Height */}
+          <div className="margin-sliders">
+            <div className="margin-slider-row">
+              <div className="margin-slider-header">
+                <span className="margin-icon">↕</span>
+                <label className="style-label">Line Height</label>
+                <EditableValue value={settings.lineHeight ?? 1.6} min={1.0} max={2.2} step={0.05} unit="×" decimals={2} onChange={v => onUpdate('lineHeight', v)} />
+              </div>
+              <input type="range" min={1.0} max={2.2} step={0.1}
+                value={settings.lineHeight ?? 1.6}
+                onChange={e => onUpdate('lineHeight', parseFloat(e.target.value))}
+                className="style-slider" />
+              <div className="margin-slider-ticks">
+                <span>1.0×</span><span>1.6×</span><span>2.2×</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Margin sliders */}
+          <div className="margin-sliders">
+            {[
+              { key: 'marginTop',    label: 'Top Margin',    icon: '↑' },
+              { key: 'marginBottom', label: 'Bottom Margin', icon: '↓' },
+              { key: 'marginLeft',   label: 'Left Margin',   icon: '←' },
+              { key: 'marginRight',  label: 'Right Margin',  icon: '→' },
+            ].map(({ key, label, icon }) => (
+              <div className="margin-slider-row" key={key}>
+                <div className="margin-slider-header">
+                  <span className="margin-icon">{icon}</span>
+                  <label className="style-label">{label}</label>
+                  <EditableValue value={settings[key] ?? 1.0} min={MARGIN_MIN} max={MARGIN_MAX} step={0.05} unit='"' decimals={2} onChange={v => onUpdate(key, v)} />
+                </div>
+                <input type="range" min={MARGIN_MIN} max={MARGIN_MAX} step={MARGIN_STEP}
+                  value={settings[key] ?? 1.0}
+                  onChange={e => onUpdate(key, parseFloat(e.target.value))}
+                  className="style-slider" />
+                <div className="margin-slider-ticks">
+                  <span>0.25"</span><span>1.00"</span><span>2.00"</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className="btn-reset-margins" onClick={reset}>
+            ↺ Reset to defaults (1" all sides)
+          </button>
+
+          <div className="page-info-box">
+            <div className="page-info-row">
+              <span>Paper Size</span>
+              <strong>US Letter — 8.5 × 11 in</strong>
+            </div>
+            <div className="page-info-row">
+              <span>Content Width</span>
+              <strong>{(8.5 - (settings.marginLeft ?? 1) - (settings.marginRight ?? 1)).toFixed(2)}" available</strong>
+            </div>
+            <div className="page-info-row">
+              <span>Content Height</span>
+              <strong>{(11 - (settings.marginTop ?? 1) - (settings.marginBottom ?? 1)).toFixed(2)}" per page</strong>
+            </div>
+          </div>
+        </div>
+  );
+}
 
 const SECTION_LABELS = {
   opening: 'Opening Paragraph',
@@ -31,7 +205,7 @@ function LetterBody({ coverLetter, resumeData, templateStyles, pageSettings, bod
   const accent  = scheme.accent;
   const noColor = (pageSettings.colorScheme ?? 'teal') === 'none';
   const align   = templateStyles.headerAlign ?? 'left';
-  const font    = templateStyles.fontFamily  ?? 'DM Sans';
+  const font    = pageSettings.bodyFont ?? 'DM Sans';
   const lh      = pageSettings.lineHeight ?? 1.6;
 
   const personal = resumeData?.personal ?? {};
@@ -338,6 +512,7 @@ export default function CoverLetterBuilder({
   personName,
 }) {
   const [generatingAll, setGeneratingAll] = useState(false);
+  const [activeTab,     setActiveTab]     = useState('content'); // 'content' | 'page'
   const pdfCaptureRef = useRef(null);
 
   const mTop    = Math.round((pageSettings.marginTop    ?? 1.0) * INCH);
@@ -448,68 +623,93 @@ export default function CoverLetterBuilder({
             </div>
           </div>
 
-          {/* Target fields */}
-          <div className="cl-target-row">
-            <div className="cl-target-field">
-              <label className="cl-target-label">Target Company</label>
-              <input className="cl-target-input" value={coverLetter.targetCompany} onChange={e => update('targetCompany', e.target.value)} placeholder="Acme Corp" />
-            </div>
-            <div className="cl-target-field">
-              <label className="cl-target-label">Target Role</label>
-              <input className="cl-target-input" value={coverLetter.targetRole} onChange={e => update('targetRole', e.target.value)} placeholder="Software Engineer" />
-            </div>
-          </div>
-
-          {/* Hiring manager + date */}
-          <div className="cl-target-row">
-            <div className="cl-target-field">
-              <label className="cl-target-label">Hiring Manager Name</label>
-              <input className="cl-target-input" value={coverLetter.hiringManagerName || ''} onChange={e => update('hiringManagerName', e.target.value)} placeholder="e.g. Sarah Johnson (optional)" />
-            </div>
-            <div className="cl-target-field">
-              <label className="cl-target-label">
-                Date
-                {showDate ? (
-                  <button className="btn-cl-icon" onClick={() => update('showDate', false)} title="Remove date">✕</button>
-                ) : (
-                  <button className="btn-cl-field-restore" onClick={() => update('showDate', true)}>+ Add date</button>
-                )}
-              </label>
-              {showDate && (
-                <input
-                  className="cl-target-input"
-                  value={customDate ?? TODAY}
-                  onChange={e => update('customDate', e.target.value)}
-                  placeholder={TODAY}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Generate all */}
-          <div className="cl-generate-all-bar">
-            <button className="btn-cl-generate-all" onClick={handleGenerateAll} disabled={generatingAll}>
-              {generatingAll ? '⏳ Writing your letter…' : '✨ Generate Full Cover Letter'}
+          {/* Tab nav — matches resume editor */}
+          <nav className="section-nav">
+            <button
+              className={`nav-btn ${activeTab === 'content' ? 'active' : ''}`}
+              onClick={() => setActiveTab('content')}
+            >
+              <span className="nav-icon">✉️</span>
+              <span>Content</span>
             </button>
-          </div>
+            <button
+              className={`nav-btn ${activeTab === 'page' ? 'active' : ''}`}
+              onClick={() => setActiveTab('page')}
+            >
+              <span className="nav-icon">📐</span>
+              <span>Page Setup</span>
+            </button>
+          </nav>
 
-          <div className="cl-sections-scroll">
-            {!resumeData && (
-              <StandaloneInfoForm info={coverLetter.standaloneInfo || {}} onChange={updateStandaloneInfo} />
-            )}
-            {['opening', 'body1', 'body2', 'closing'].map(key => (
-              <SectionCard
-                key={key}
-                sectionKey={key}
-                value={coverLetter.sections[key]}
-                onChange={updateSect}
-                onDelete={deleteSection}
-                onRestore={restoreSection}
-                onRegenerate={handleRegenerateSection}
-                loading={generatingAll}
+          {/* Content tab */}
+          {activeTab === 'content' && (
+            <>
+              <div className="cl-target-row">
+                <div className="cl-target-field">
+                  <label className="cl-target-label">Target Company</label>
+                  <input className="cl-target-input" value={coverLetter.targetCompany} onChange={e => update('targetCompany', e.target.value)} placeholder="Acme Corp" />
+                </div>
+                <div className="cl-target-field">
+                  <label className="cl-target-label">Target Role</label>
+                  <input className="cl-target-input" value={coverLetter.targetRole} onChange={e => update('targetRole', e.target.value)} placeholder="Software Engineer" />
+                </div>
+              </div>
+
+              <div className="cl-target-row">
+                <div className="cl-target-field">
+                  <label className="cl-target-label">Hiring Manager Name</label>
+                  <input className="cl-target-input" value={coverLetter.hiringManagerName || ''} onChange={e => update('hiringManagerName', e.target.value)} placeholder="e.g. Sarah Johnson (optional)" />
+                </div>
+                <div className="cl-target-field">
+                  <label className="cl-target-label">
+                    Date
+                    {showDate ? (
+                      <button className="btn-cl-icon" onClick={() => update('showDate', false)} title="Remove date">✕</button>
+                    ) : (
+                      <button className="btn-cl-field-restore" onClick={() => update('showDate', true)}>+ Add date</button>
+                    )}
+                  </label>
+                  {showDate && (
+                    <input className="cl-target-input" value={customDate ?? TODAY} onChange={e => update('customDate', e.target.value)} placeholder={TODAY} />
+                  )}
+                </div>
+              </div>
+
+              <div className="cl-generate-all-bar">
+                <button className="btn-cl-generate-all" onClick={handleGenerateAll} disabled={generatingAll}>
+                  {generatingAll ? '⏳ Writing your letter…' : '✨ Generate Full Cover Letter'}
+                </button>
+              </div>
+
+              <div className="cl-sections-scroll">
+                {!resumeData && (
+                  <StandaloneInfoForm info={coverLetter.standaloneInfo || {}} onChange={updateStandaloneInfo} />
+                )}
+                {['opening', 'body1', 'body2', 'closing'].map(key => (
+                  <SectionCard
+                    key={key}
+                    sectionKey={key}
+                    value={coverLetter.sections[key]}
+                    onChange={updateSect}
+                    onDelete={deleteSection}
+                    onRestore={restoreSection}
+                    onRegenerate={handleRegenerateSection}
+                    loading={generatingAll}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Page Setup tab */}
+          {activeTab === 'page' && (
+            <div className="form-content animate-in">
+              <CLPageSetupForm
+                settings={pageSettings}
+                onUpdate={(field, val) => onChange({ ...coverLetter, pageSettings: { ...pageSettings, [field]: val } })}
               />
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* ── Right: preview ── */}

@@ -56,6 +56,7 @@ function ResumePreview({ resume, styles, pageSettings, scale }) {
   const colorScheme    = pageSettings.colorScheme   ?? 'teal';
   const lineHeight     = pageSettings.lineHeight     ?? 1.6;
   const photoPosition  = pageSettings.photoPosition  ?? 'left';
+  const bodyFont       = pageSettings.bodyFont       ?? 'DM Sans';
   const personalStyles = styles.personal ?? {};
 
   const mTop    = Math.round((pageSettings.marginTop    ?? 1.0) * INCH_PX);
@@ -74,6 +75,7 @@ function ResumePreview({ resume, styles, pageSettings, scale }) {
     lineHeight,
     personalStyles,
     colorScheme,
+    bodyFont,
     ...extraProps,
   };
 

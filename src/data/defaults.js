@@ -9,7 +9,7 @@ export const DEFAULT_STYLES = {
     headerContactSize: 12,
   },
   experience: {
-    fontFamily: 'DM Sans',
+    // fontFamily removed — body font now lives in pageSettings.bodyFont
     fontSize: 13,
     bulletSpacing: 3,
     formatting: {
@@ -19,7 +19,7 @@ export const DEFAULT_STYLES = {
     },
   },
   education: {
-    fontFamily: 'DM Sans',
+    // fontFamily removed — body font now lives in pageSettings.bodyFont
     fontSize: 13,
     formatting: {
       school: { bold: false, italic: false, underline: false },
@@ -34,13 +34,14 @@ export const DEFAULT_STYLES = {
 };
 
 export const DEFAULT_PAGE_SETTINGS = {
-  marginTop: 1.0,
+  marginTop:    1.0,
   marginBottom: 1.0,
-  marginLeft: 1.0,
-  marginRight: 1.0,
-  lineHeight: 1.6,
-  colorScheme: 'teal',
+  marginLeft:   1.0,
+  marginRight:  1.0,
+  lineHeight:   1.6,
+  colorScheme:  'teal',
   photoPosition: 'left',
+  bodyFont:     'DM Sans',
 };
 
 /** Build merged sectionStyles from a template object + DEFAULT_STYLES */

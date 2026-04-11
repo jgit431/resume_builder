@@ -52,7 +52,7 @@ const SVG_ICONS = {
   ),
 };
 
-export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme }) {
+export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme, bodyFont }) {
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
@@ -116,7 +116,7 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 
           {experience.length > 0 && (
             <div className="r-section" style={{
-              fontFamily: sectionStyles.experience.fontFamily,
+              fontFamily: bodyFont,
               fontSize:   `${sectionStyles.experience.fontSize}px`,
             }}>
               <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${expTitleSize}px` }}>Experience</div>
@@ -150,7 +150,7 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 
           {education.length > 0 && (
             <div className="r-section" style={{
-              fontFamily: sectionStyles.education.fontFamily,
+              fontFamily: bodyFont,
               fontSize:   `${sectionStyles.education.fontSize}px`,
             }}>
               <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${eduTitleSize}px` }}>Education</div>
@@ -199,7 +199,7 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
 // ─────────────────────────────────────────────────────────
 // Sidebar layout — two-column with photo, contact & skills on left
 // ─────────────────────────────────────────────────────────
-export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, colorScheme, personalStyles }) {
+export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, colorScheme, personalStyles, bodyFont }) {
   const { personal, experience, education, skills } = resume;
   const scheme        = getScheme(colorScheme);
   const accent        = scheme.accent;
@@ -302,7 +302,7 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
             {experience.map(exp => {
               const bullets = exp.bullets.filter(b => b.trim());
               return (
-                <div key={exp.id} style={{ marginBottom: 12, fontFamily: sectionStyles.experience.fontFamily, fontSize: `${sectionStyles.experience.fontSize}px` }}>
+                <div key={exp.id} style={{ marginBottom: 12, fontFamily: bodyFont, fontSize: `${sectionStyles.experience.fontSize}px` }}>
                   <div className="r-entry-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <span style={fmt(expFmt.role)}>{exp.role}</span>
@@ -329,7 +329,7 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
           <>
             {sectionTitle('Education', eduTitleSize)}
             {education.map(edu => (
-              <div key={edu.id} style={{ marginBottom: 8, fontFamily: sectionStyles.education.fontFamily, fontSize: `${sectionStyles.education.fontSize}px` }}>
+              <div key={edu.id} style={{ marginBottom: 8, fontFamily: bodyFont, fontSize: `${sectionStyles.education.fontSize}px` }}>
                 <div className="r-entry-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <div>
                     {(edu.degree || edu.field) && <span style={fmt(eduFmt.degree)}>{[edu.degree, edu.field].filter(Boolean).join(' in ')}</span>}
@@ -350,7 +350,7 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
 // ─────────────────────────────────────────────────────────
 // Executive Photo layout — classic single-column with optional circular headshot
 // ─────────────────────────────────────────────────────────
-export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme, photoPosition }) {
+export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme, photoPosition, bodyFont }) {
   const { personal, experience, education, skills } = resume;
   const scheme    = getScheme(colorScheme);
   const accent    = scheme.accent;
@@ -408,7 +408,7 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
         </div>
       )}
       {experience.length > 0 && (
-        <div className="r-section" style={{ fontFamily: sectionStyles.experience.fontFamily, fontSize: `${sectionStyles.experience.fontSize}px` }}>
+        <div className="r-section" style={{ fontFamily: bodyFont, fontSize: `${sectionStyles.experience.fontSize}px` }}>
           <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${expTitleSize}px` }}>Experience</div>
           {experience.map(exp => {
             const bullets = exp.bullets.filter(b => b.trim());
@@ -427,7 +427,7 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
         </div>
       )}
       {education.length > 0 && (
-        <div className="r-section" style={{ fontFamily: sectionStyles.education.fontFamily, fontSize: `${sectionStyles.education.fontSize}px` }}>
+        <div className="r-section" style={{ fontFamily: bodyFont, fontSize: `${sectionStyles.education.fontSize}px` }}>
           <div className="r-section-title" style={{ color: accent, borderColor: noColor ? '#1a1a1a' : '#ddd', fontSize: `${eduTitleSize}px` }}>Education</div>
           {education.map(edu => (
             <div className="r-education-entry" key={edu.id}>
@@ -521,11 +521,12 @@ export default function PreviewPanel({ resume, sectionStyles, pageSettings, onCh
 
   const lineHeight     = pageSettings.lineHeight ?? 1.6;
   const colorScheme    = pageSettings.colorScheme ?? 'teal';
+  const bodyFont       = pageSettings.bodyFont ?? 'DM Sans';
   const personalStyles = sectionStyles.personal ?? { headerAlign: 'left', showIcons: true };
   const photoPosition  = pageSettings.photoPosition ?? 'left';
   const layoutType     = pageSettings.layout ?? 'standard';
 
-  const bodyProps = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme };
+  const bodyProps = { resume, sectionStyles, mLeft, mRight, lineHeight, personalStyles, colorScheme, bodyFont };
 
   const BodyComponent = layoutType === 'sidebar'         ? SidebarBody
                       : layoutType === 'executive-photo' ? ExecutivePhotoBody

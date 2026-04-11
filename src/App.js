@@ -272,9 +272,14 @@ export default function App() {
     if (!proj) return;
 
     const linkedToResume = !!proj.resume;
-    const cl = makeCoverLetterSlot({ templateId: clTemplate.id, templateName: clTemplate.name, linkedToResume });
+    // Default font: match linked resume's body font; otherwise use template default
+    const defaultBodyFont = linkedToResume
+      ? (proj.resume.pageSettings?.bodyFont ?? clTemplate.pageSettings.bodyFont ?? 'DM Sans')
+      : (clTemplate.pageSettings.bodyFont ?? 'DM Sans');
+
+    const cl = makeCoverLetterSlot({ templateId: clTemplate.id, templateName: clTemplate.name, linkedToResume, defaultBodyFont });
     cl.sectionStyles = clTemplate.styles;
-    cl.pageSettings  = clTemplate.pageSettings;
+    cl.pageSettings  = { ...clTemplate.pageSettings, bodyFont: defaultBodyFont };
 
     setProjects(prev => {
       const p = prev.find(x => x.id === activeProjectId);
@@ -284,7 +289,6 @@ export default function App() {
     setActiveCoverId(cl.id);
 
     if (fullAppMode) {
-      // Full application flow complete — land in the resume builder
       setFullAppMode(false);
       setView('builder');
     } else {
@@ -529,12 +533,15 @@ export default function App() {
     const personName = resumeData?.personal?.name
                     || activeCoverLetter?.standaloneInfo?.name
                     || 'cover_letter';
+    // Use stored pageSettings on the slot (may have user customisations like bodyFont),
+    // falling back to the template defaults if not yet set.
+    const clPageSettings = activeCoverLetter.pageSettings ?? clTemplate.pageSettings;
     return (
       <CoverLetterBuilder
-        coverLetter={activeCoverLetter}
+        coverLetter={{ ...activeCoverLetter, pageSettings: clPageSettings }}
         resumeData={resumeData}
         templateStyles={clTemplate.styles}
-        pageSettings={clTemplate.pageSettings}
+        pageSettings={clPageSettings}
         templateName={clTemplate.name}
         onBack={() => setView('project-home')}
         onChange={handleUpdateCoverLetter}

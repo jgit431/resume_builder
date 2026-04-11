@@ -75,7 +75,7 @@ export function makeResumeSlot({ templateId = 'classic', templateName = 'Classic
 
 // ── Cover letter slot factory ─────────────────────────────
 // Stored inside project.coverLetters[].
-export function makeCoverLetterSlot({ templateId = 'classic', templateName = 'Classic', linkedToResume = true } = {}) {
+export function makeCoverLetterSlot({ templateId = 'classic', templateName = 'Classic', linkedToResume = true, defaultBodyFont = 'DM Sans' } = {}) {
   return {
     id:                generateId(),
     templateId,
@@ -83,9 +83,9 @@ export function makeCoverLetterSlot({ templateId = 'classic', templateName = 'Cl
     linkedToResume,
     targetCompany:     '',
     targetRole:        '',
-    hiringManagerName: '',  // if set, used in salutation
-    customDate:        null, // null = today's date; string = user-specified date
-    showDate:          true, // false = date hidden entirely
+    hiringManagerName: '',
+    customDate:        null,
+    showDate:          true,
     sections: {
       opening: '',
       body1:   '',
@@ -93,7 +93,8 @@ export function makeCoverLetterSlot({ templateId = 'classic', templateName = 'Cl
       closing: '',
     },
     sectionStyles: null,
-    pageSettings:  null,
+    pageSettings:  null, // set after slot creation from template + defaultBodyFont
+    _defaultBodyFont: defaultBodyFont, // stored so App.js can apply it to pageSettings
     standaloneInfo: linkedToResume ? null : {
       name: '', title: '', skills: [], experience: [], education: [],
     },

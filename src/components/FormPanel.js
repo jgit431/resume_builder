@@ -379,10 +379,8 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false, defaultS
   const [open, setOpen] = useState(false);
 
   const reset = () => {
-    updateStyle('fontFamily', defaultStyles?.fontFamily ?? 'DM Sans');
     updateStyle('fontSize',   defaultStyles?.fontSize   ?? 13);
     if (showBulletSpacing) updateStyle('bulletSpacing', defaultStyles?.bulletSpacing ?? 3);
-    // Reset formatting to template defaults, not hardcoded false
     if (styles.formatting) {
       updateStyle('formatting', defaultStyles?.formatting ?? styles.formatting);
     }
@@ -400,20 +398,6 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false, defaultS
 
       {open && (
         <div className="style-toolbar-body">
-          {/* Font Family */}
-          <div className="style-row">
-            <label className="style-label">Font</label>
-            <select
-              className="style-select"
-              value={styles.fontFamily}
-              onChange={e => updateStyle('fontFamily', e.target.value)}
-            >
-              {FONT_OPTIONS.map(f => (
-                <option key={f.value} value={f.value}>{f.label}</option>
-              ))}
-            </select>
-          </div>
-
           {/* Font Size */}
           <div className="style-row">
             <label className="style-label">Body Text <EditableValue value={styles.fontSize} min={10} max={16} step={0.5} unit="px" decimals={1} onChange={v => updateStyle('fontSize', v)} /></label>
@@ -859,6 +843,7 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
     update('marginRight', 1.0);
     update('lineHeight', 1.6);
     update('colorScheme', 'teal');
+    update('bodyFont', 'DM Sans');
   };
 
   const SCHEMES = [
@@ -895,6 +880,20 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
             />
           ))}
         </div>
+      </div>
+
+      {/* Body font picker */}
+      <div className="style-row">
+        <label className="style-label">Body Font</label>
+        <select
+          className="style-select"
+          value={settings.bodyFont ?? 'DM Sans'}
+          onChange={e => update('bodyFont', e.target.value)}
+        >
+          {FONT_OPTIONS.map(f => (
+            <option key={f.value} value={f.value}>{f.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Photo position — only for templates with photoPosition: true */}

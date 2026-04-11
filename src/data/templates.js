@@ -31,11 +31,11 @@ export const TEMPLATES = [
     features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'left', showIcons: true },
-      experience: { fontFamily: 'DM Sans', fontSize: 13, bulletSpacing: 3 },
-      education:  { fontFamily: 'DM Sans', fontSize: 13 },
+      experience: { fontSize: 13, bulletSpacing: 3 },
+      education:  { fontSize: 13 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.6, colorScheme: 'teal', layout: 'standard' },
+    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.6, colorScheme: 'teal', layout: 'standard', bodyFont: 'DM Sans' },
   },
   {
     id: 'modern',
@@ -44,11 +44,11 @@ export const TEMPLATES = [
     features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: true },
-      experience: { fontFamily: 'DM Sans', fontSize: 13, bulletSpacing: 5 },
-      education:  { fontFamily: 'DM Sans', fontSize: 13 },
+      experience: { fontSize: 13, bulletSpacing: 5 },
+      education:  { fontSize: 13 },
       skills:     { separator: 'marker' },
     },
-    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.7, colorScheme: 'teal', layout: 'standard' },
+    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.7, colorScheme: 'teal', layout: 'standard', bodyFont: 'DM Sans' },
   },
   {
     id: 'executive',
@@ -57,11 +57,11 @@ export const TEMPLATES = [
     features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: false },
-      experience: { fontFamily: 'Georgia', fontSize: 13, bulletSpacing: 6 },
-      education:  { fontFamily: 'Georgia', fontSize: 13 },
+      experience: { fontSize: 13, bulletSpacing: 6 },
+      education:  { fontSize: 13 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.25, marginRight: 1.25, lineHeight: 1.8, colorScheme: 'none', layout: 'standard' },
+    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.25, marginRight: 1.25, lineHeight: 1.8, colorScheme: 'none', layout: 'standard', bodyFont: 'Georgia' },
   },
   {
     id: 'minimal',
@@ -70,11 +70,11 @@ export const TEMPLATES = [
     features: { photo: false, photoPosition: false, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'left', showIcons: false },
-      experience: { fontFamily: 'DM Sans', fontSize: 12, bulletSpacing: 2 },
-      education:  { fontFamily: 'DM Sans', fontSize: 12 },
+      experience: { fontSize: 12, bulletSpacing: 2 },
+      education:  { fontSize: 12 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.5, colorScheme: 'none', layout: 'standard' },
+    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.5, colorScheme: 'none', layout: 'standard', bodyFont: 'DM Sans' },
   },
   {
     id: 'sidebar',
@@ -83,11 +83,11 @@ export const TEMPLATES = [
     features: { photo: true, photoPosition: false, skillsSeparator: false, headerAlign: false },
     styles: {
       personal:   { headerAlign: 'left', showIcons: true },
-      experience: { fontFamily: 'DM Sans', fontSize: 12, bulletSpacing: 3 },
-      education:  { fontFamily: 'DM Sans', fontSize: 12 },
+      experience: { fontSize: 12, bulletSpacing: 3 },
+      education:  { fontSize: 12 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.6, colorScheme: 'teal', layout: 'sidebar', photoPosition: 'left' },
+    pageSettings: { marginTop: 0.75, marginBottom: 0.75, marginLeft: 0.75, marginRight: 0.75, lineHeight: 1.6, colorScheme: 'teal', layout: 'sidebar', photoPosition: 'left', bodyFont: 'DM Sans' },
   },
   {
     id: 'executive-photo',
@@ -96,11 +96,11 @@ export const TEMPLATES = [
     features: { photo: true, photoPosition: true, skillsSeparator: true, headerAlign: true },
     styles: {
       personal:   { headerAlign: 'center', showIcons: false },
-      experience: { fontFamily: 'Georgia', fontSize: 13, bulletSpacing: 5 },
-      education:  { fontFamily: 'Georgia', fontSize: 13 },
+      experience: { fontSize: 13, bulletSpacing: 5 },
+      education:  { fontSize: 13 },
       skills:     { separator: 'comma' },
     },
-    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.7, colorScheme: 'none', layout: 'executive-photo', photoPosition: 'left' },
+    pageSettings: { marginTop: 1.0, marginBottom: 1.0, marginLeft: 1.0, marginRight: 1.0, lineHeight: 1.7, colorScheme: 'none', layout: 'executive-photo', photoPosition: 'left', bodyFont: 'Georgia' },
   },
 ];
 
@@ -160,23 +160,18 @@ export function TemplateSVG({ template }) {
 
   // ── Executive Photo layout thumbnail ──────────────────────
   if (layout === 'executive-photo') {
-    const photoPos      = pageSettings.photoPosition ?? 'left';
-    const photoX        = photoPos === 'right' ? 88 : 10;
-    const textAreaLeft  = photoPos === 'right' ? 10 : 32;
-    const textAreaRight = photoPos === 'right' ? 84 : 118;
-    const textCenter    = textAreaLeft + (textAreaRight - textAreaLeft) / 2;
-    // Center each header block within the text area
-    const nameX    = Math.round(textCenter - 26); // block w=52
-    const titleX   = Math.round(textCenter - 18); // block w=36
-    const contactX = Math.max(textAreaLeft, Math.round(textCenter - 31)); // block w=62
+    const photoPos = pageSettings.photoPosition ?? 'left';
+    const photoX = photoPos === 'right' ? 88 : 10;
+    const textX  = photoPos === 'right' ? 10 : 32;
+    const textW  = 70;
     return (
       <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: '100%' }}>
         <rect width={W} height={H} fill="white"/>
         <circle cx={photoX + 11} cy={16} r={11} fill="#ddd"/>
         <circle cx={photoX + 11} cy={16} r={11} fill="none" stroke={noColor ? '#888' : color} strokeWidth={1.5}/>
-        <rect x={nameX}    y={8}  width={52} height={5}   rx={0.5} fill="#1a1a1a"/>
-        <rect x={titleX}   y={16} width={36} height={3}   rx={0.5} fill="#666"/>
-        <rect x={contactX} y={22} width={62} height={2}   rx={0.5} fill="#bbb"/>
+        <rect x={textX} y={8} width={52} height={5} rx={0.5} fill="#1a1a1a"/>
+        <rect x={textX+6} y={16} width={38} height={3} rx={0.5} fill="#666"/>
+        <rect x={textX} y={22} width={textW} height={2} rx={0.5} fill="#bbb"/>
         <rect x={10} y={32} width={100} height={1.5} fill={noColor ? '#1a1a1a' : color}/>
         <rect x={10} y={38} width={30} height={2.5} rx={0.5} fill={noColor ? '#555' : color}/>
         <rect x={10} y={42} width={100} height={0.5} fill="#ccc"/>
@@ -191,7 +186,7 @@ export function TemplateSVG({ template }) {
         <rect x={10} y={118} width={22} height={2.5} rx={0.5} fill={noColor ? '#555' : color}/>
         <rect x={10} y={122} width={100} height={0.5} fill="#ccc"/>
         <rect x={10} y={126} width={100} height={2.5} rx={0.5} fill="#e8e8e8"/>
-        <rect x={10} y={131} width={70}  height={2.5} rx={0.5} fill="#e8e8e8"/>
+        <rect x={10} y={131} width={70} height={2.5} rx={0.5} fill="#e8e8e8"/>
       </svg>
     );
   }
@@ -203,10 +198,10 @@ export function TemplateSVG({ template }) {
   const mx     = tight ? 6 : wide ? 18 : 12;
   const my     = tight ? 6 : wide ? 16 : 10;
   const gap    = (pageSettings.lineHeight ?? 1.6) >= 1.8 ? 6 : tight ? 2 : 4;
-  const serif  = (styles.experience?.fontFamily ?? '').includes('Georgia') ||
-                 (styles.experience?.fontFamily ?? '').includes('Garamond') ||
-                 (styles.experience?.fontFamily ?? '').includes('Times');
-  const mono   = (styles.experience?.fontFamily ?? '').includes('Courier');
+  const serif  = (pageSettings.bodyFont ?? '').includes('Georgia') ||
+                 (pageSettings.bodyFont ?? '').includes('Garamond') ||
+                 (pageSettings.bodyFont ?? '').includes('Times');
+  const mono   = (pageSettings.bodyFont ?? '').includes('Courier');
   const marker = styles.skills?.separator === 'marker';
   const icons  = styles.personal?.showIcons !== false;
   const cw     = W - mx * 2;
