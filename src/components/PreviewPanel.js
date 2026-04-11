@@ -10,6 +10,9 @@ const PAGE_H_PX = Math.round(INCH_PX * 11); // ~841px
 // Resume body — plain component, no forwardRef needed.
 // Left/right margins applied here; top/bottom handled per-page.
 // ─────────────────────────────────────────────────────────
+// SVG_ICONS(color, forced)
+// - forced=false (default): branded colors for location/linkedin, accent for others
+// - forced=true: all icons use `color` uniformly
 const SVG_ICONS = {
   email: (color) => (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,7 +24,7 @@ const SVG_ICONS = {
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.09 4.93 2 2 0 0 1 3 2.84h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 10a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.16 17z"/>
     </svg>
   ),
-  location: (color) => color === '#1a1a1a' ? (
+  location: (color, forced) => forced ? (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
     </svg>
@@ -30,7 +33,7 @@ const SVG_ICONS = {
       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="white" stroke="white"/>
     </svg>
   ),
-  linkedin: (color) => color === '#1a1a1a' ? (
+  linkedin: (color, forced) => forced ? (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
     </svg>
@@ -53,11 +56,14 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
   const { personal, experience, education, skills } = resume;
   const hasContent = personal.name || personal.email ||
                      experience.length > 0 || education.length > 0;
-  const align     = personalStyles.headerAlign ?? 'left';
-  const showIcons = personalStyles.showIcons ?? true;
-  const scheme    = getScheme(colorScheme);
-  const accent    = scheme.accent;
-  const noColor   = colorScheme === 'none';
+  const align      = personalStyles.headerAlign ?? 'left';
+  const showIcons  = personalStyles.showIcons ?? true;
+  const scheme     = getScheme(colorScheme);
+  const accent     = scheme.accent;
+  const noColor    = colorScheme === 'none';
+  const iconColor  = personalStyles.iconColor ?? 'default';
+  const forced     = iconColor === 'accent';
+  const iconCol    = forced ? accent : '#555';
 
   // Helper to build inline style from formatting object
   const fmt = (f) => f ? {
@@ -90,11 +96,11 @@ export function ResumeBody({ resume, sectionStyles, mLeft, mRight, lineHeight, p
             {personal.name  && <h1 className="r-name">{personal.name}</h1>}
             {personal.title && <p className="r-title">{personal.title}</p>}
             <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
-              {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(accent)}{personal.email}</span>}
-              {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(accent)}{personal.phone}</span>}
-              {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(accent)}{personal.location}</span>}
-              {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.linkedin(accent)}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
-              {personal.website  && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.website(accent)}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+              {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(iconCol, forced)}{personal.email}</span>}
+              {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(iconCol, forced)}{personal.phone}</span>}
+              {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(iconCol, forced)}{personal.location}</span>}
+              {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.linkedin(iconCol, forced)}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+              {personal.website  && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.website(iconCol, forced)}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
             </div>
           </div>
 
@@ -197,7 +203,10 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
   const sidebarBg     = scheme.sidebarBg;
   const sidebarBorder = scheme.sidebarBorder;
   const sidebarW      = '32%';
-  const showIcons     = personalStyles?.showIcons ?? true;
+  const showIcons     = personalStyles?.showIcons  ?? true;
+  const iconColor     = personalStyles?.iconColor   ?? 'default';
+  const forced        = iconColor === 'accent';
+  const iconCol       = forced ? accent : '#555';
 
   const expFmt = sectionStyles.experience?.formatting ?? {};
   const eduFmt = sectionStyles.education?.formatting  ?? {};
@@ -239,11 +248,11 @@ export function SidebarBody({ resume, sectionStyles, mLeft, mRight, lineHeight, 
           <>
             {sectionTitle('Contact')}
             {[
-              personal.email    && { icon: SVG_ICONS.email(accent),    text: personal.email },
-              personal.phone    && { icon: SVG_ICONS.phone(accent),    text: personal.phone },
-              personal.location && { icon: SVG_ICONS.location(accent), text: personal.location },
-              personal.linkedin && { icon: SVG_ICONS.linkedin(accent), text: personal.linkedin.replace(/^https?:\/\/(www\.)?/, '') },
-              personal.website  && { icon: SVG_ICONS.website(accent),  text: personal.website.replace(/^https?:\/\/(www\.)?/, '') },
+              personal.email    && { icon: SVG_ICONS.email(iconCol, forced),    text: personal.email },
+              personal.phone    && { icon: SVG_ICONS.phone(iconCol, forced),    text: personal.phone },
+              personal.location && { icon: SVG_ICONS.location(iconCol, forced), text: personal.location },
+              personal.linkedin && { icon: SVG_ICONS.linkedin(iconCol, forced), text: personal.linkedin.replace(/^https?:\/\/(www\.)?/, '') },
+              personal.website  && { icon: SVG_ICONS.website(iconCol, forced),  text: personal.website.replace(/^https?:\/\/(www\.)?/, '') },
             ].filter(Boolean).map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 10.5, color: '#333', marginBottom: 5, wordBreak: 'break-all' }}>
                 {showIcons && <span style={{ flexShrink: 0, marginTop: 1 }}>{item.icon}</span>}
@@ -342,6 +351,9 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
   const noColor   = colorScheme === 'none';
   const align     = personalStyles.headerAlign ?? 'center';
   const showIcons = personalStyles.showIcons ?? true;
+  const iconColor = personalStyles.iconColor  ?? 'default';
+  const forced    = iconColor === 'accent';
+  const iconCol   = forced ? accent : '#555';
   const photoSide = photoPosition ?? 'left';
   const PHOTO_SIZE = 72;
 
@@ -369,11 +381,11 @@ export function ExecutivePhotoBody({ resume, sectionStyles, mLeft, mRight, lineH
           {personal.name  && <h1 className="r-name" style={{ fontFamily: sectionStyles.experience.fontFamily }}>{personal.name}</h1>}
           {personal.title && <p className="r-title">{personal.title}</p>}
           <div className="r-contact" style={{ justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
-            {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(accent)}{personal.email}</span>}
-            {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(accent)}{personal.phone}</span>}
-            {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(accent)}{personal.location}</span>}
-            {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.linkedin(accent)}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
-            {personal.website  && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.website(accent)}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+            {personal.email    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.email(iconCol, forced)}{personal.email}</span>}
+            {personal.phone    && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.phone(iconCol, forced)}{personal.phone}</span>}
+            {personal.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.location(iconCol, forced)}{personal.location}</span>}
+            {personal.linkedin && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.linkedin(iconCol, forced)}{personal.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</span>}
+            {personal.website  && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{showIcons && SVG_ICONS.website(iconCol, forced)}{personal.website.replace(/^https?:\/\/(www\.)?/, '')}</span>}
           </div>
         </div>
       </div>

@@ -183,15 +183,31 @@ function PersonalForm({ data, update, styles, updateStyle, resume, templateFeatu
               </div>
             )}
 
-            {/* Icons toggle */}
+            {/* Icons toggle + color mode — all in one row */}
             <div className="style-row">
-              <label className="style-label">Contact Icons</label>
-              <button
-                className={`sep-btn ${styles.showIcons ? 'active' : ''}`}
-                onClick={() => updateStyle('showIcons', !styles.showIcons)}
-              >
-                Show Icons
-              </button>
+              <label className="style-label">Contact Info Icons</label>
+              <div className="separator-toggle">
+                <button
+                  className={`sep-btn ${styles.showIcons ? 'active' : ''}`}
+                  onClick={() => updateStyle('showIcons', !styles.showIcons)}
+                >
+                  Show Icons
+                </button>
+                {styles.showIcons && (<>
+                  <button
+                    className={`sep-btn ${(styles.iconColor ?? 'default') === 'default' ? 'active' : ''}`}
+                    onClick={() => updateStyle('iconColor', 'default')}
+                  >
+                    Default Colors
+                  </button>
+                  <button
+                    className={`sep-btn ${styles.iconColor === 'accent' ? 'active' : ''}`}
+                    onClick={() => updateStyle('iconColor', 'accent')}
+                  >
+                    Theme Colors
+                  </button>
+                </>)}
+              </div>
             </div>
 
             <button className="btn-reset-margins" onClick={reset}>

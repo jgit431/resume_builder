@@ -91,6 +91,7 @@ const DEFAULT_STYLES = {
   personal: {
     headerAlign: 'left',
     showIcons: true,
+    iconColor: 'default',
   },
   experience: {
     fontFamily: 'DM Sans',
@@ -145,10 +146,10 @@ export default function App() {
   };
 
   const handleSelectTemplate = (template) => {
-    // Deep merge so formatting keys from DEFAULT_STYLES are preserved
+    // Deep merge all sections so keys from DEFAULT_STYLES are always preserved
     setSectionStyles(s => ({
       ...s,
-      ...template.styles,
+      personal:   { ...DEFAULT_STYLES.personal,   ...template.styles.personal   },
       experience: { ...DEFAULT_STYLES.experience, ...template.styles.experience },
       education:  { ...DEFAULT_STYLES.education,  ...template.styles.education  },
       skills:     { ...DEFAULT_STYLES.skills,      ...template.styles.skills     },
@@ -157,7 +158,7 @@ export default function App() {
     setTemplateFeatures(template.features ?? { photo: false, photoPosition: false });
     setTemplateDefaultStyles({
       ...DEFAULT_STYLES,
-      ...template.styles,
+      personal:   { ...DEFAULT_STYLES.personal,   ...template.styles.personal   },
       experience: { ...DEFAULT_STYLES.experience, ...template.styles.experience },
       education:  { ...DEFAULT_STYLES.education,  ...template.styles.education  },
       skills:     { ...DEFAULT_STYLES.skills,      ...template.styles.skills     },
