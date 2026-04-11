@@ -978,3 +978,29 @@
   gap: 4px;
   width: 100%;
 }
+
+/* ── Editable slider values ── */
+.editable-value {
+  cursor: text;
+  border-bottom: 1px dashed var(--ink-faint);
+  padding-bottom: 1px;
+  transition: border-color 0.15s;
+}
+
+.editable-value:hover {
+  border-bottom-color: var(--teal);
+  color: var(--teal);
+}
+
+.editable-value-input {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--teal-light);
+  border: 1px solid var(--teal);
+  border-radius: 4px;
+  padding: 1px 4px;
+  text-align: center;
+  outline: none;
+  min-width: 36px;
+}

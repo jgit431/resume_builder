@@ -257,6 +257,54 @@ function PersonalForm({ data, update, styles, updateStyle, resume, templateFeatu
   );
 }
 
+// ── Editable value display for sliders ────────────────────
+// Click to type a custom value; rounds to nearest `step`, clamps to [min, max]
+function EditableValue({ value, min, max, step, unit = '', decimals = 2, onChange }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft]     = useState('');
+
+  const roundToStep = (v) => {
+    const rounded = Math.round(v / step) * step;
+    const clamped = Math.min(max, Math.max(min, rounded));
+    return parseFloat(clamped.toFixed(10)); // avoid float drift
+  };
+
+  const commit = () => {
+    const parsed = parseFloat(draft);
+    if (!isNaN(parsed)) onChange(roundToStep(parsed));
+    setEditing(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') commit();
+    if (e.key === 'Escape') setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <input
+        className="editable-value-input"
+        autoFocus
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={handleKeyDown}
+        style={{ width: `${Math.max(36, (draft.length + 1) * 8)}px` }}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="style-value editable-value"
+      onClick={() => { setDraft(value.toFixed(decimals)); setEditing(true); }}
+      title="Click to enter a value"
+    >
+      {value.toFixed(decimals)}{unit}
+    </span>
+  );
+}
+
 // ── Style Toolbar ─────────────────────────────────────────
 const FONT_OPTIONS = [
   { label: 'DM Sans', value: 'DM Sans' },
@@ -308,7 +356,7 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false, defaultS
 
           {/* Font Size */}
           <div className="style-row">
-            <label className="style-label">Body Text <span className="style-value">{styles.fontSize}px</span></label>
+            <label className="style-label">Body Text <EditableValue value={styles.fontSize} min={10} max={16} step={0.5} unit="px" decimals={1} onChange={v => updateStyle('fontSize', v)} /></label>
             <input
               type="range" min={10} max={16} step={0.5}
               value={styles.fontSize}
@@ -320,7 +368,7 @@ function StyleToolbar({ styles, updateStyle, showBulletSpacing = false, defaultS
           {/* Bullet Spacing */}
           {showBulletSpacing && (
             <div className="style-row">
-              <label className="style-label">Bullet Spacing <span className="style-value">{styles.bulletSpacing}px</span></label>
+              <label className="style-label">Bullet Spacing <EditableValue value={styles.bulletSpacing} min={0} max={12} step={1} unit="px" decimals={0} onChange={v => updateStyle('bulletSpacing', v)} /></label>
               <input
                 type="range" min={0} max={12} step={1}
                 value={styles.bulletSpacing}
@@ -852,7 +900,7 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
           <div className="margin-slider-header">
             <span className="margin-icon">↕</span>
             <label className="style-label">Line Height</label>
-            <span className="style-value">{(settings.lineHeight ?? 1.6).toFixed(1)}×</span>
+            <EditableValue value={settings.lineHeight ?? 1.6} min={1.0} max={2.2} step={0.05} unit="×" decimals={2} onChange={v => update('lineHeight', v)} />
           </div>
           <input
             type="range" min={1.0} max={2.2} step={0.1}
@@ -880,7 +928,7 @@ function PageSetupForm({ settings, update, templateFeatures = {} }) {
             <div className="margin-slider-header">
               <span className="margin-icon">{icon}</span>
               <label className="style-label">{label}</label>
-              <span className="style-value">{settings[key].toFixed(2)}"</span>
+              <EditableValue value={settings[key]} min={MARGIN_MIN} max={MARGIN_MAX} step={0.05} unit='"' decimals={2} onChange={v => update(key, v)} />
             </div>
             <input
               type="range"
