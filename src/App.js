@@ -15,7 +15,7 @@ import {
   loadProjects, persistProjects,
   makeProject, makeResumeSlot, makeCoverLetterSlot,
   upsertProject, removeProject,
-  countTotals, MAX_RESUMES,
+  countTotals, MAX_RESUMES, MAX_COVER_LETTERS_TOTAL,
   uniqueProjectName,
 } from './data/projectStore';
 import { parseResume } from './ai';
@@ -252,6 +252,16 @@ export default function App() {
     setView('cl-template-select');
   }, [activeProjectId]);
 
+  // Called from the nudge overlay — creates a standalone project then goes to CL template picker
+  const handleNewStandaloneCoverLetter = useCallback(() => {
+    const { coverLetters } = countTotals(projects);
+    if (coverLetters >= MAX_COVER_LETTERS_TOTAL) return;
+    const proj = makeProject({ type: 'cover-letter', name: uniqueProjectName(projects, 'New Cover Letter') });
+    setProjects(prev => [...prev, proj]);
+    setActiveProjectId(proj.id);
+    setView('cl-template-select');
+  }, [projects]);
+
   const handleNewFull = useCallback(() => {
     const { resumes } = countTotals(projects);
     if (resumes >= MAX_RESUMES) return;
@@ -479,7 +489,7 @@ export default function App() {
         onOpenProject={handleOpenProject}
         onDeleteProject={handleDeleteProject}
         onNewResume={handleNewResume}
-        onNewCoverLetter={handleNewCoverLetter}
+        onNewCoverLetter={handleNewStandaloneCoverLetter}
         onNewFull={handleNewFull}
         onImport={handleUpload}
         uploadStatus={uploadStatus}
