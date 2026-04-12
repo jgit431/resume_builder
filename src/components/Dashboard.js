@@ -132,6 +132,52 @@ function ResumeModal({ onScratch, onImport, onCancel }) {
   );
 }
 
+// ── Feedback form ─────────────────────────────────────────
+function FeedbackForm() {
+  const [message, setMessage] = useState('');
+  const [status, setStatus]   = useState(null); // null | 'sending' | 'sent' | 'error'
+
+  const handleSubmit = async () => {
+    if (!message.trim()) return;
+    setStatus('sending');
+    try {
+      const res = await fetch('https://formspree.io/f/xqegrvkk', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ message }),
+      });
+      setStatus(res.ok ? 'sent' : 'error');
+      if (res.ok) setMessage('');
+    } catch {
+      setStatus('error');
+    }
+    setTimeout(() => setStatus(null), 4000);
+  };
+
+  if (status === 'sent') {
+    return <p className="feedback-thanks">✓ Thanks for your feedback!</p>;
+  }
+
+  return (
+    <div className="feedback-form">
+      <textarea
+        className="feedback-textarea"
+        placeholder="Share your idea or feedback…"
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        rows={2}
+      />
+      <button
+        className="feedback-btn"
+        onClick={handleSubmit}
+        disabled={status === 'sending' || !message.trim()}
+      >
+        {status === 'sending' ? 'Sending…' : status === 'error' ? 'Try again' : 'Send'}
+      </button>
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────
 export default function Dashboard({
   projects,
@@ -291,7 +337,31 @@ export default function Dashboard({
         onChange={handleFileChange}
       />
 
-      <footer className="dashboard-footer">© 2025 Cedar Resumes · Built with ✦</footer>
+      <footer className="dashboard-footer">
+        <div className="dashboard-footer-inner">
+          {/* Left — brand */}
+          <div className="dashboard-footer-brand">
+            <div className="dashboard-footer-brand-top">
+              <img
+                src={`${process.env.PUBLIC_URL}/logos/logo.png`}
+                alt="Cedar Resumes"
+                className="dashboard-footer-logo"
+              />
+              <div className="dashboard-footer-brand-text">
+                <span className="dashboard-footer-name">Cedar Resumes</span>
+                <span className="dashboard-footer-tagline">Build it. Love it. Ship it.</span>
+              </div>
+            </div>
+            <p className="dashboard-footer-copy">© 2026 Cedar Resumes by Julien Ataya</p>
+          </div>
+
+          {/* Right — feedback */}
+          <div className="dashboard-footer-contact">
+            <p className="dashboard-footer-prompt">Have a suggestion? We'd love to hear it.</p>
+            <FeedbackForm />
+          </div>
+        </div>
+      </footer>
 
       {/* Resume start modal */}
       {showResumeModal && (

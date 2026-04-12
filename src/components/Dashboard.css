@@ -249,12 +249,6 @@
   border: 2px solid var(--border);
   border-radius: 16px;
   padding: 28px 24px 24px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.dash-new-card:not(.at-limit):hover {
-  border-color: var(--teal);
-  box-shadow: var(--shadow);
 }
 
 .dash-new-card.at-limit {
@@ -427,11 +421,138 @@
 
 /* ── Footer ── */
 .dashboard-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
-  color: var(--ink-faint);
+  background: var(--cream);
   border-top: 1px solid var(--border);
+  padding: 16px 48px;
+  margin-top: auto;
+}
+
+.dashboard-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+/* Left — brand column */
+.dashboard-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.dashboard-footer-brand-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* TODO: logo has transparent top padding causing text to appear slightly high at
+   center alignment. This 2px nudge compensates — revisit if logo asset changes. */
+.dashboard-footer-brand-top span {
+  position: relative;
+  top: 2px;
+}
+
+.dashboard-footer-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.dashboard-footer-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-footer-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--cedar);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.dashboard-footer-tagline {
+  font-size: 13px;
+  color: #6a9a6a;
+  letter-spacing: 0.08em;
+}
+
+.dashboard-footer-copy {
+  font-size: 11px;
+  color: var(--ink-faint);
+  padding-left: 2px;
+}
+
+/* Right — feedback column */
+.dashboard-footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  max-width: 560px;
+}
+
+.dashboard-footer-prompt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-light);
+}
+
+.feedback-form {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.feedback-textarea {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--white);
+  resize: none;
+  line-height: 1.5;
+  min-height: 54px;
+  transition: border-color 0.2s;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.feedback-btn {
+  background: var(--teal);
+  color: white;
+  border: none;
+  padding: 0 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  align-self: stretch;
+}
+
+.feedback-btn:hover:not(:disabled) { opacity: 0.85; }
+.feedback-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.feedback-thanks {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal);
 }
 
 /* ── Responsive ── */
